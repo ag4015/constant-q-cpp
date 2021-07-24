@@ -48,7 +48,7 @@ using std::complex;
 using std::cerr;
 using std::endl;
 
-typedef std::complex<double> C;
+typedef std::complex<cq_float> C;
 
 //#define DEBUG_CQ_KERNEL 1
 
@@ -68,7 +68,7 @@ CQKernel::~CQKernel()
     delete m_fft;
 }
 
-vector<double>
+vector<cq_float>
 CQKernel::makeWindow(int len) const
 {
     // The MATLAB version uses a symmetric window, but our windows
@@ -92,8 +92,8 @@ CQKernel::makeWindow(int len) const
         break;
     }
 
-    Window<double> w(wt, len-1);
-    vector<double> win = w.getWindowData();
+    Window<cq_float> w(wt, len-1);
+    vector<cq_float> win = w.getWindowData();
     win.push_back(win[0]);
 
     switch (m_inparams.window) {
@@ -119,17 +119,17 @@ CQKernel::makeWindow(int len) const
 bool
 CQKernel::generateKernel()
 {
-    double q = m_inparams.q;
-    double atomHopFactor = m_inparams.atomHopFactor;
-    double thresh = m_inparams.threshold;
+    cq_float q = m_inparams.q;
+    cq_float atomHopFactor = m_inparams.atomHopFactor;
+    cq_float thresh = m_inparams.threshold;
 
-    double bpo = m_p.binsPerOctave;
+    cq_float bpo = m_p.binsPerOctave;
 
     m_p.minFrequency = (m_p.maxFrequency / 2) * pow(2, 1.0/bpo);
     m_p.Q = q / (pow(2, 1.0/bpo) - 1.0);
 
-    double maxNK = int(m_p.Q * m_p.sampleRate / m_p.minFrequency + 0.5);
-    double minNK = int
+    cq_float maxNK = int(m_p.Q * m_p.sampleRate / m_p.minFrequency + 0.5);
+    cq_float minNK = int
         (m_p.Q * m_p.sampleRate /
          (m_p.minFrequency * pow(2, (bpo - 1.0) / bpo)) + 0.5);
 
@@ -172,14 +172,14 @@ CQKernel::generateKernel()
         int nk = int(m_p.Q * m_p.sampleRate /
                      (m_p.minFrequency * pow(2, ((k-1.0) / bpo))) + 0.5);
 
-        vector<double> win = makeWindow(nk);
+        vector<cq_float> win = makeWindow(nk);
 
-        double fk = m_p.minFrequency * pow(2, ((k-1.0) / bpo));
+        cq_float fk = m_p.minFrequency * pow(2, ((k-1.0) / bpo));
 
-        vector<double> reals, imags;
+        vector<cq_float> reals, imags;
         
         for (int i = 0; i < nk; ++i) {
-            double arg = (2.0 * M_PI * fk * i) / m_p.sampleRate;
+            cq_float arg = (2.0 * M_PI * fk * i) / m_p.sampleRate;
             reals.push_back(win[i] * cos(arg));
             imags.push_back(win[i] * sin(arg));
         }
@@ -190,16 +190,16 @@ CQKernel::generateKernel()
 
             int shift = atomOffset + (i * m_p.atomSpacing);
 
-            vector<double> rin(m_p.fftSize, 0.0);
-            vector<double> iin(m_p.fftSize, 0.0);
+            vector<cq_float> rin(m_p.fftSize, 0.0);
+            vector<cq_float> iin(m_p.fftSize, 0.0);
 
             for (int j = 0; j < nk; ++j) {
                 rin[j + shift] = reals[j];
                 iin[j + shift] = imags[j];
             }
 
-            vector<double> rout(m_p.fftSize, 0.0);
-            vector<double> iout(m_p.fftSize, 0.0);
+            vector<cq_float> rout(m_p.fftSize, 0.0);
+            vector<cq_float> iout(m_p.fftSize, 0.0);
 
             m_fft->process(false,
                            rin.data(), iin.data(),
@@ -245,7 +245,7 @@ CQKernel::generateKernel()
     assert((int)m_kernel.data[0].size() == m_p.fftSize);
 
 #ifdef DEBUG_CQ_KERNEL
-    cerr << "density = " << double(nnz) / double(m_p.binsPerOctave * m_p.atomsPerFrame * m_p.fftSize) << " (" << nnz << " of " << m_p.binsPerOctave * m_p.atomsPerFrame * m_p.fftSize << ")" << endl;
+    cerr << "density = " << cq_float(nnz) / cq_float(m_p.binsPerOctave * m_p.atomsPerFrame * m_p.fftSize) << " (" << nnz << " of " << m_p.binsPerOctave * m_p.atomsPerFrame * m_p.fftSize << ")" << endl;
 #endif
 
     finaliseKernel();
@@ -295,13 +295,13 @@ CQKernel::finaliseKernel()
         }
     }
 
-    vector<double> wK;
-    double q = m_inparams.q;
+    vector<cq_float> wK;
+    cq_float q = m_inparams.q;
     for (int i = int(1.0/q + 0.5); i < ncols - int(1.0/q + 0.5) - 2; ++i) {
         wK.push_back(abs(square[i][i]));
     }
 
-    double weight = double(m_p.fftHop) / m_p.fftSize;
+    cq_float weight = cq_float(m_p.fftHop) / m_p.fftSize;
     if (!wK.empty()) {
         weight /= MathUtilities::mean(wK.data(), wK.size());
     }

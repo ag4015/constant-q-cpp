@@ -32,6 +32,7 @@
 #ifndef RESAMPLER_H
 #define RESAMPLER_H
 
+#include "ConstantQConfig.h"
 #include <vector>
 
 /**
@@ -58,7 +59,7 @@ public:
      * targetRate, using the given filter parameters.
      */
     Resampler(int sourceRate, int targetRate,
-              double snr, double bandwidth);
+              cq_float snr, cq_float bandwidth);
 
     virtual ~Resampler();
 
@@ -69,13 +70,13 @@ public:
      * caller must ensure the dst buffer has enough space for the
      * samples returned.
      */
-    int process(const double *src, double *dst, int n);
+    int process(const cq_float *src, cq_float *dst, int n);
 
     /**
      * Read n input samples from src and return resampled data by
      * value.
      */
-    std::vector<double> process(const double *src, int n);
+    std::vector<cq_float> process(const cq_float *src, int n);
 
     /**
      * Return the number of samples of latency at the output due by
@@ -88,8 +89,8 @@ public:
      * Carry out a one-off resample of a single block of n
      * samples. The output is latency-compensated.
      */
-    static std::vector<double> resample
-    (int sourceRate, int targetRate, const double *data, int n);
+    static std::vector<cq_float> resample
+    (int sourceRate, int targetRate, const cq_float *data, int n);
 
 private:
     int m_sourceRate;
@@ -97,21 +98,21 @@ private:
     int m_gcd;
     int m_filterLength;
     int m_latency;
-    double m_peakToPole;
+    cq_float m_peakToPole;
     
     struct Phase {
         int nextPhase;
-        std::vector<double> filter;
+        std::vector<cq_float> filter;
         int drop;
     };
 
     Phase *m_phaseData;
     int m_phase;
-    std::vector<double> m_buffer;
+    std::vector<cq_float> m_buffer;
     int m_bufferOrigin;
 
-    void initialise(double, double);
-    double reconstructOne();
+    void initialise(cq_float, cq_float);
+    cq_float reconstructOne();
 };
 
 #endif

@@ -37,61 +37,61 @@
 #include <cmath>
 
 
-double MathUtilities::mod(double x, double y)
+cq_float MathUtilities::mod(cq_float x, cq_float y)
 {
-    double a = floor( x / y );
+    cq_float a = floor( x / y );
 
-    double b = x - ( y * a );
+    cq_float b = x - ( y * a );
     return b;
 }
 
-double MathUtilities::princarg(double ang)
+cq_float MathUtilities::princarg(cq_float ang)
 {
-    double ValOut;
+    cq_float ValOut;
 
     ValOut = mod( ang + M_PI, -2 * M_PI ) + M_PI;
 
     return ValOut;
 }
 
-void MathUtilities::getAlphaNorm(const double *data, unsigned int len, unsigned int alpha, double* ANorm)
+void MathUtilities::getAlphaNorm(const cq_float *data, unsigned int len, unsigned int alpha, cq_float* ANorm)
 {
     unsigned int i;
-    double temp = 0.0;
-    double a=0.0;
+    cq_float temp = 0.0;
+    cq_float a=0.0;
 	
     for( i = 0; i < len; i++)
     {
 	temp = data[ i ];
 		
-	a  += ::pow( fabs(temp), double(alpha) );
+	a  += ::pow( fabs(temp), cq_float(alpha) );
     }
-    a /= ( double )len;
-    a = ::pow( a, ( 1.0 / (double) alpha ) );
+    a /= ( cq_float )len;
+    a = ::pow( a, ( 1.0 / (cq_float) alpha ) );
 
     *ANorm = a;
 }
 
-double MathUtilities::getAlphaNorm( const std::vector <double> &data, unsigned int alpha )
+cq_float MathUtilities::getAlphaNorm( const std::vector <cq_float> &data, unsigned int alpha )
 {
     unsigned int i;
     unsigned int len = data.size();
-    double temp = 0.0;
-    double a=0.0;
+    cq_float temp = 0.0;
+    cq_float a=0.0;
 	
     for( i = 0; i < len; i++)
     {
 	temp = data[ i ];
 		
-	a  += ::pow( fabs(temp), double(alpha) );
+	a  += ::pow( fabs(temp), cq_float(alpha) );
     }
-    a /= ( double )len;
-    a = ::pow( a, ( 1.0 / (double) alpha ) );
+    a /= ( cq_float )len;
+    a = ::pow( a, ( 1.0 / (cq_float) alpha ) );
 
     return a;
 }
 
-double MathUtilities::round(double x)
+cq_float MathUtilities::round(cq_float x)
 {
     if (x < 0) {
         return -floor(-x + 0.5);
@@ -100,11 +100,11 @@ double MathUtilities::round(double x)
     }
 }
 
-double MathUtilities::median(const double *src, unsigned int len)
+cq_float MathUtilities::median(const cq_float *src, unsigned int len)
 {
     if (len == 0) return 0;
     
-    std::vector<double> scratch;
+    std::vector<cq_float> scratch;
     for (int i = 0; i < (int)len; ++i) scratch.push_back(src[i]);
     std::sort(scratch.begin(), scratch.end());
 
@@ -116,10 +116,10 @@ double MathUtilities::median(const double *src, unsigned int len)
     }
 }
 
-double MathUtilities::sum(const double *src, unsigned int len)
+cq_float MathUtilities::sum(const cq_float *src, unsigned int len)
 {
     unsigned int i ;
-    double retVal =0.0;
+    cq_float retVal =0.0;
 
     for(  i = 0; i < len; i++)
     {
@@ -129,24 +129,24 @@ double MathUtilities::sum(const double *src, unsigned int len)
     return retVal;
 }
 
-double MathUtilities::mean(const double *src, unsigned int len)
+cq_float MathUtilities::mean(const cq_float *src, unsigned int len)
 {
-    double retVal =0.0;
+    cq_float retVal =0.0;
 
     if (len == 0) return 0;
 
-    double s = sum( src, len );
+    cq_float s = sum( src, len );
 	
-    retVal =  s  / (double)len;
+    retVal =  s  / (cq_float)len;
 
     return retVal;
 }
 
-double MathUtilities::mean(const std::vector<double> &src,
+cq_float MathUtilities::mean(const std::vector<cq_float> &src,
                            unsigned int start,
                            unsigned int count)
 {
-    double sum = 0.;
+    cq_float sum = 0.;
 	
     if (count == 0) return 0;
     
@@ -158,10 +158,10 @@ double MathUtilities::mean(const std::vector<double> &src,
     return sum / count;
 }
 
-void MathUtilities::getFrameMinMax(const double *data, unsigned int len, double *min, double *max)
+void MathUtilities::getFrameMinMax(const cq_float *data, unsigned int len, cq_float *min, cq_float *max)
 {
     unsigned int i;
-    double temp = 0.0;
+    cq_float temp = 0.0;
 
     if (len == 0) {
         *min = *max = 0;
@@ -187,13 +187,13 @@ void MathUtilities::getFrameMinMax(const double *data, unsigned int len, double 
     }
 }
 
-int MathUtilities::getMax( double* pData, unsigned int Length, double* pMax )
+int MathUtilities::getMax( cq_float* pData, unsigned int Length, cq_float* pMax )
 {
 	unsigned int index = 0;
 	unsigned int i;
-	double temp = 0.0;
+	cq_float temp = 0.0;
 	
-	double max = pData[0];
+	cq_float max = pData[0];
 
 	for( i = 0; i < Length; i++)
 	{
@@ -213,13 +213,13 @@ int MathUtilities::getMax( double* pData, unsigned int Length, double* pMax )
 	return index;
 }
 
-int MathUtilities::getMax( const std::vector<double> & data, double* pMax )
+int MathUtilities::getMax( const std::vector<cq_float> & data, cq_float* pMax )
 {
 	unsigned int index = 0;
 	unsigned int i;
-	double temp = 0.0;
+	cq_float temp = 0.0;
 	
-	double max = data[0];
+	cq_float max = data[0];
 
 	for( i = 0; i < data.size(); i++)
 	{
@@ -239,10 +239,10 @@ int MathUtilities::getMax( const std::vector<double> & data, double* pMax )
 	return index;
 }
 
-void MathUtilities::circShift( double* pData, int length, int shift)
+void MathUtilities::circShift( cq_float* pData, int length, int shift)
 {
 	shift = shift % length;
-	double temp;
+	cq_float temp;
 	int i,n;
 
 	for( i = 0; i < shift; i++)
@@ -263,7 +263,7 @@ int MathUtilities::compareInt (const void * a, const void * b)
   return ( *(int*)a - *(int*)b );
 }
 
-void MathUtilities::normalise(double *data, int length, NormaliseType type)
+void MathUtilities::normalise(cq_float *data, int length, NormaliseType type)
 {
     switch (type) {
 
@@ -271,7 +271,7 @@ void MathUtilities::normalise(double *data, int length, NormaliseType type)
 
     case NormaliseUnitSum:
     {
-        double sum = 0.0;
+        cq_float sum = 0.0;
         for (int i = 0; i < length; ++i) {
             sum += data[i];
         }
@@ -285,7 +285,7 @@ void MathUtilities::normalise(double *data, int length, NormaliseType type)
 
     case NormaliseUnitMax:
     {
-        double max = 0.0;
+        cq_float max = 0.0;
         for (int i = 0; i < length; ++i) {
             if (fabs(data[i]) > max) {
                 max = fabs(data[i]);
@@ -302,7 +302,7 @@ void MathUtilities::normalise(double *data, int length, NormaliseType type)
     }
 }
 
-void MathUtilities::normalise(std::vector<double> &data, NormaliseType type)
+void MathUtilities::normalise(std::vector<cq_float> &data, NormaliseType type)
 {
     switch (type) {
 
@@ -310,7 +310,7 @@ void MathUtilities::normalise(std::vector<double> &data, NormaliseType type)
 
     case NormaliseUnitSum:
     {
-        double sum = 0.0;
+        cq_float sum = 0.0;
         for (int i = 0; i < (int)data.size(); ++i) sum += data[i];
         if (sum != 0.0) {
             for (int i = 0; i < (int)data.size(); ++i) data[i] /= sum;
@@ -320,7 +320,7 @@ void MathUtilities::normalise(std::vector<double> &data, NormaliseType type)
 
     case NormaliseUnitMax:
     {
-        double max = 0.0;
+        cq_float max = 0.0;
         for (int i = 0; i < (int)data.size(); ++i) {
             if (fabs(data[i]) > max) max = fabs(data[i]);
         }
@@ -333,12 +333,12 @@ void MathUtilities::normalise(std::vector<double> &data, NormaliseType type)
     }
 }
 
-void MathUtilities::adaptiveThreshold(std::vector<double> &data)
+void MathUtilities::adaptiveThreshold(std::vector<cq_float> &data)
 {
     int sz = int(data.size());
     if (sz == 0) return;
 
-    std::vector<double> smoothed(sz);
+    std::vector<cq_float> smoothed(sz);
 	
     int p_pre = 8;
     int p_post = 7;
@@ -395,11 +395,11 @@ MathUtilities::nearestPowerOfTwo(int x)
     else return n1;
 }
 
-double
+cq_float
 MathUtilities::factorial(int x)
 {
     if (x < 0) return 0;
-    double f = 1;
+    cq_float f = 1;
     for (int i = 1; i <= x; ++i) {
 	f = f * i;
     }

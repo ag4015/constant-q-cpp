@@ -253,8 +253,8 @@ CQSpectrogram::linearInterpolated(const RealBlock &g, int x0, int x1)
 
 	for (int i = 0; i + spacing <= width; i += spacing) {
 	    for (int j = 1; j < spacing; ++j) {
-		double proportion = double(j)/double(spacing);
-		double interpolated = 
+		cq_float proportion = cq_float(j)/cq_float(spacing);
+		cq_float interpolated = 
 		    g[x0 + i][y] * (1.0 - proportion) +
 		    g[x0 + i + spacing][y] * proportion;
 		out[i + j].push_back(interpolated);

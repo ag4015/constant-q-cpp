@@ -22,7 +22,7 @@ using std::endl;
     }
 
 void
-testSymmetric(double *d, int n)
+testSymmetric(cq_float *d, int n)
 {
     for (int i = 0; i <= n/2; ++i) {
 	BOOST_CHECK_CLOSE(d[i], d[n-i-1], 1e-10);
@@ -35,11 +35,11 @@ BOOST_AUTO_TEST_CASE(periodic)
     // only one cycle of it! But we can make sure that all but the
     // first sample is symmetric, which is what a symmetric window
     // becomes when generated in periodic mode
-    double d[9];
+    cq_float d[9];
     for (int n = 8; n <= 9; ++n) {
 	for (int wt = (int)FirstWindow; wt <= (int)LastWindow; ++wt) {
 	    for (int i = 0; i < n; ++i) d[i] = 1.0;
-	    Window<double> w((WindowType)wt, n);
+	    Window<cq_float> w((WindowType)wt, n);
 	    w.cut(d);
 	    testSymmetric(d + 1, n - 1);
 	}
@@ -47,15 +47,15 @@ BOOST_AUTO_TEST_CASE(periodic)
 }
 
 template <int N>
-void testWindow(WindowType type, const double expected[N])
+void testWindow(WindowType type, const cq_float expected[N])
 {
-    double d[N];
+    cq_float d[N];
     for (int i = 0; i < N; ++i) d[i] = 1.0;
-    Window<double> w(type, N);
+    Window<cq_float> w(type, N);
     w.cut(d);
     COMPARE_ARRAY(d, expected);
 
-    double d0[N], d1[N];
+    cq_float d0[N], d1[N];
     for (int i = 0; i < N; ++i) d0[i] = 0.5 + (1.0 / (N * 2)) * (i + 1);
     w.cut(d0, d1);
     for (int i = 0; i < N; ++i) {
@@ -65,31 +65,31 @@ void testWindow(WindowType type, const double expected[N])
 
 BOOST_AUTO_TEST_CASE(bartlett)
 {
-    double e1[] = { 1 };
+    cq_float e1[] = { 1 };
     testWindow<1>(BartlettWindow, e1);
 
-    double e2[] = { 0, 0 };
+    cq_float e2[] = { 0, 0 };
     testWindow<2>(BartlettWindow, e2);
 
-    double e3[] = { 0, 2./3., 2./3. };
+    cq_float e3[] = { 0, 2./3., 2./3. };
     testWindow<3>(BartlettWindow, e3);
 
-    double e4[] = { 0, 1./2., 1., 1./2. };
+    cq_float e4[] = { 0, 1./2., 1., 1./2. };
     testWindow<4>(BartlettWindow, e4);
 
-    double e5[] = { 0, 1./2., 1., 1., 1./2. };
+    cq_float e5[] = { 0, 1./2., 1., 1., 1./2. };
     testWindow<5>(BartlettWindow, e5);
 
-    double e6[] = { 0, 1./3., 2./3., 1., 2./3., 1./3. };
+    cq_float e6[] = { 0, 1./3., 2./3., 1., 2./3., 1./3. };
     testWindow<6>(BartlettWindow, e6);
 }
     
 BOOST_AUTO_TEST_CASE(hamming)
 {
-    double e1[] = { 1 };
+    cq_float e1[] = { 1 };
     testWindow<1>(HammingWindow, e1);
 
-    double e10[] = {
+    cq_float e10[] = {
 	0.0800, 0.1679, 0.3979, 0.6821, 0.9121,
         1.0000, 0.9121, 0.6821, 0.3979, 0.1679
     };
@@ -98,10 +98,10 @@ BOOST_AUTO_TEST_CASE(hamming)
     
 BOOST_AUTO_TEST_CASE(hann)
 {
-    double e1[] = { 1 };
+    cq_float e1[] = { 1 };
     testWindow<1>(HanningWindow, e1);
 
-    double e10[] = {
+    cq_float e10[] = {
         0, 0.0955, 0.3455, 0.6545, 0.9045,
         1.0000, 0.9045, 0.6545, 0.3455, 0.0955,
     };
@@ -110,10 +110,10 @@ BOOST_AUTO_TEST_CASE(hann)
     
 BOOST_AUTO_TEST_CASE(blackman)
 {
-    double e1[] = { 1 };
+    cq_float e1[] = { 1 };
     testWindow<1>(BlackmanWindow, e1);
 
-    double e10[] = {
+    cq_float e10[] = {
         0, 0.0402, 0.2008, 0.5098, 0.8492,
         1.0000, 0.8492, 0.5098, 0.2008, 0.0402,
     };
@@ -122,10 +122,10 @@ BOOST_AUTO_TEST_CASE(blackman)
     
 BOOST_AUTO_TEST_CASE(blackmanHarris)
 {
-    double e1[] = { 1 };
+    cq_float e1[] = { 1 };
     testWindow<1>(BlackmanHarrisWindow, e1);
 
-    double e10[] = {
+    cq_float e10[] = {
         0.0001, 0.0110, 0.1030, 0.3859, 0.7938,
         1.0000, 0.7938, 0.3859, 0.1030, 0.0110,
     };
@@ -134,9 +134,9 @@ BOOST_AUTO_TEST_CASE(blackmanHarris)
 
 BOOST_AUTO_TEST_CASE(kaiser_4_10)
 {
-    double d[10];
+    cq_float d[10];
     for (int i = 0; i < 10; ++i) d[i] = 1.0;
-    double e[] = { 
+    cq_float e[] = { 
         0.0885, 0.2943, 0.5644, 0.8216, 0.9789,
         0.9789, 0.8216, 0.5644, 0.2943, 0.0885
     };
@@ -150,9 +150,9 @@ BOOST_AUTO_TEST_CASE(kaiser_4_10)
     
 BOOST_AUTO_TEST_CASE(kaiser_2p5_11)
 {
-    double d[11];
+    cq_float d[11];
     for (int i = 0; i < 11; ++i) d[i] = 1.0;
-    double e[] = { 
+    cq_float e[] = { 
         0.3040, 0.5005, 0.6929, 0.8546, 0.9622,
         1.0000, 0.9622, 0.8546, 0.6929, 0.5005, 0.3040
     };
@@ -167,15 +167,15 @@ BOOST_AUTO_TEST_CASE(kaiser_2p5_11)
 //!!! todo: tests for kaiser with attenuation and bandwidth parameters
 
 template <int N>
-void testSinc(double p, const double expected[N])
+void testSinc(cq_float p, const cq_float expected[N])
 {
-    double d[N];
+    cq_float d[N];
     for (int i = 0; i < N; ++i) d[i] = 1.0;
     SincWindow w(N, p);
     w.cut(d);
     COMPARE_ARRAY(d, expected);
 
-    double d0[N], d1[N];
+    cq_float d0[N], d1[N];
     for (int i = 0; i < N; ++i) d0[i] = 0.5 + (1.0 / (N * 2)) * (i + 1);
     w.cut(d0, d1);
     for (int i = 0; i < N; ++i) {
@@ -185,16 +185,16 @@ void testSinc(double p, const double expected[N])
 
 BOOST_AUTO_TEST_CASE(sinc)
 {
-    double e1[] = { 0, 0, 1, 0, 0 };
+    cq_float e1[] = { 0, 0, 1, 0, 0 };
     testSinc<5>(1, e1);
 
-    double e2[] = { 0, 0, 1, 0, 0 };
+    cq_float e2[] = { 0, 0, 1, 0, 0 };
     testSinc<5>(2, e2);
 
-    double e3[] = { -0.2122, 0.0, 0.6366, 1.0, 0.6366, 0, -0.2122 };
+    cq_float e3[] = { -0.2122, 0.0, 0.6366, 1.0, 0.6366, 0, -0.2122 };
     testSinc<7>(4, e3);
 
-    double e4[] = { -0.2122, 0, 0.6366, 1, 0.6366, 0 };
+    cq_float e4[] = { -0.2122, 0, 0.6366, 1, 0.6366, 0 };
     testSinc<6>(4, e4);
 }
         

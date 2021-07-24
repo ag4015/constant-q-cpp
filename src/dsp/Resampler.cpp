@@ -60,7 +60,7 @@ Resampler::Resampler(int sourceRate, int targetRate) :
 }
 
 Resampler::Resampler(int sourceRate, int targetRate, 
-                     double snr, double bandwidth) :
+                     cq_float snr, cq_float bandwidth) :
     m_sourceRate(sourceRate),
     m_targetRate(targetRate)
 {
@@ -73,7 +73,7 @@ Resampler::~Resampler()
 }
 
 void
-Resampler::initialise(double snr, double bandwidth)
+Resampler::initialise(cq_float snr, cq_float bandwidth)
 {
     int higher = std::max(m_sourceRate, m_targetRate);
     int lower = std::min(m_sourceRate, m_targetRate);
@@ -97,12 +97,12 @@ Resampler::initialise(double snr, double bandwidth)
 
     m_filterLength = params.length;
 
-    vector<double> filter;
+    vector<cq_float> filter;
 
     KaiserWindow kw(params);
     SincWindow sw(m_filterLength, m_peakToPole * 2);
 
-    filter = vector<double>(m_filterLength, 0.0);
+    filter = vector<cq_float>(m_filterLength, 0.0);
     for (int i = 0; i < m_filterLength; ++i) filter[i] = 1.0;
     sw.cut(filter.data());
     kw.cut(filter.data());
@@ -197,10 +197,10 @@ Resampler::initialise(double snr, double bandwidth)
 	while (p.nextPhase < 0) p.nextPhase += inputSpacing;
 	p.nextPhase %= inputSpacing;
 	
-	p.drop = int(ceil(std::max(0.0, double(outputSpacing - phase))
+	p.drop = int(ceil(std::max(cq_float(0.0), cq_float(outputSpacing - phase))
 			  / inputSpacing));
 
-	int filtZipLength = int(ceil(double(m_filterLength - phase)
+	int filtZipLength = int(ceil(cq_float(m_filterLength - phase)
 				     / inputSpacing));
 
 	for (int i = 0; i < filtZipLength; ++i) {
@@ -272,7 +272,7 @@ Resampler::initialise(double snr, double bandwidth)
     // the centre of the filter.
 
     int h = int(m_filterLength / 2);
-    int n = ceil(double(m_filterLength - h) / outputSpacing);
+    int n = ceil(cq_float(m_filterLength - h) / outputSpacing);
     
     m_phase = (h + n * outputSpacing) % inputSpacing;
 
@@ -280,7 +280,7 @@ Resampler::initialise(double snr, double bandwidth)
     
     m_latency = n;
 
-    m_buffer = vector<double>(fill, 0);
+    m_buffer = vector<cq_float>(fill, 0);
     m_bufferOrigin = 0;
 
 #ifdef DEBUG_RESAMPLER
@@ -289,11 +289,11 @@ Resampler::initialise(double snr, double bandwidth)
 #endif
 }
 
-double
+cq_float
 Resampler::reconstructOne()
 {
     Phase &pd = m_phaseData[m_phase];
-    double v = 0.0;
+    cq_float v = 0.0;
     int n = pd.filter.size();
 
     if (n + m_bufferOrigin > (int)m_buffer.size()) {
@@ -310,8 +310,8 @@ Resampler::reconstructOne()
 #define R__
 #endif
 
-    const double *const R__ buf(m_buffer.data() + m_bufferOrigin);
-    const double *const R__ filt(pd.filter.data());
+    const cq_float *const R__ buf(m_buffer.data() + m_bufferOrigin);
+    const cq_float *const R__ filt(pd.filter.data());
 
     for (int i = 0; i < n; ++i) {
 	// NB gcc can only vectorize this with -ffast-math
@@ -324,18 +324,18 @@ Resampler::reconstructOne()
 }
 
 int
-Resampler::process(const double *src, double *dst, int n)
+Resampler::process(const cq_float *src, cq_float *dst, int n)
 {
     m_buffer.insert(m_buffer.end(), src, src + n);
 
-    int maxout = int(ceil(double(n) * m_targetRate / m_sourceRate));
+    int maxout = int(ceil(cq_float(n) * m_targetRate / m_sourceRate));
     int outidx = 0;
 
 #ifdef DEBUG_RESAMPLER
     cerr << "process: buf siz " << m_buffer.size() << " filt siz for phase " << m_phase << " " << m_phaseData[m_phase].filter.size() << endl;
 #endif
 
-    double scaleFactor = (double(m_targetRate) / m_gcd) / m_peakToPole;
+    cq_float scaleFactor = (cq_float(m_targetRate) / m_gcd) / m_peakToPole;
 
     while (outidx < maxout &&
 	   m_buffer.size() >= m_phaseData[m_phase].filter.size() + m_bufferOrigin) {
@@ -349,25 +349,25 @@ Resampler::process(const double *src, double *dst, int n)
         throw std::logic_error("m_bufferOrigin > m_buffer.size()");
     }
 
-    m_buffer = vector<double>(m_buffer.begin() + m_bufferOrigin, m_buffer.end());
+    m_buffer = vector<cq_float>(m_buffer.begin() + m_bufferOrigin, m_buffer.end());
     m_bufferOrigin = 0;
     
     return outidx;
 }
     
-vector<double>
-Resampler::process(const double *src, int n)
+vector<cq_float>
+Resampler::process(const cq_float *src, int n)
 {
-    int maxout = int(ceil(double(n) * m_targetRate / m_sourceRate));
-    vector<double> out(maxout, 0.0);
+    int maxout = int(ceil(cq_float(n) * m_targetRate / m_sourceRate));
+    vector<cq_float> out(maxout, 0.0);
     int got = process(src, out.data(), n);
     assert(got <= maxout);
     if (got < maxout) out.resize(got);
     return out;
 }
 
-vector<double>
-Resampler::resample(int sourceRate, int targetRate, const double *data, int n)
+vector<cq_float>
+Resampler::resample(int sourceRate, int targetRate, const cq_float *data, int n)
 {
     Resampler r(sourceRate, targetRate);
 
@@ -377,7 +377,7 @@ Resampler::resample(int sourceRate, int targetRate, const double *data, int n)
     // padding input samples at the end of input to guarantee at
     // *least* the latency's worth of output samples. that is,
 
-    int inputPad = int(ceil((double(latency) * sourceRate) / targetRate));
+    int inputPad = int(ceil((cq_float(latency) * sourceRate) / targetRate));
 
     // that means we are providing this much input in total:
 
@@ -385,18 +385,18 @@ Resampler::resample(int sourceRate, int targetRate, const double *data, int n)
 
     // and obtaining this much output in total:
 
-    int m1 = int(ceil((double(n1) * targetRate) / sourceRate));
+    int m1 = int(ceil((cq_float(n1) * targetRate) / sourceRate));
 
     // in order to return this much output to the user:
 
-    int m = int(ceil((double(n) * targetRate) / sourceRate));
+    int m = int(ceil((cq_float(n) * targetRate) / sourceRate));
     
 #ifdef DEBUG_RESAMPLER
     cerr << "n = " << n << ", sourceRate = " << sourceRate << ", targetRate = " << targetRate << ", m = " << m << ", latency = " << latency << ", inputPad = " << inputPad << ", m1 = " << m1 << ", n1 = " << n1 << ", n1 - n = " << n1 - n << endl;
 #endif
 
-    vector<double> pad(n1 - n, 0.0);
-    vector<double> out(m1 + 1, 0.0);
+    vector<cq_float> pad(n1 - n, 0.0);
+    vector<cq_float> out(m1 + 1, 0.0);
 
     int gotData = r.process(data, out.data(), n);
     int gotPad = r.process(pad.data(), out.data() + gotData, pad.size());
@@ -418,7 +418,7 @@ Resampler::resample(int sourceRate, int targetRate, const double *data, int n)
     int toReturn = got - latency;
     if (toReturn > m) toReturn = m;
 
-    vector<double> sliced(out.begin() + latency, 
+    vector<cq_float> sliced(out.begin() + latency, 
 			  out.begin() + latency + toReturn);
 
 #ifdef DEBUG_RESAMPLER_VERBOSE

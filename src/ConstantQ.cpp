@@ -74,14 +74,14 @@ ConstantQ::~ConstantQ()
     delete m_kernel;
 }
 
-double
+cq_float
 ConstantQ::getMinFrequency() const
 {
     return m_p.minFrequency / pow(2.0, m_octaves - 1);
 }
 
-double
-ConstantQ::getBinFrequency(double bin) const
+cq_float
+ConstantQ::getBinFrequency(cq_float bin) const
 {
     // our bins are returned in high->low order
     bin = (getBinsPerOctave() * getOctaves()) - bin - 1;
@@ -197,15 +197,15 @@ ConstantQ::initialise()
     int totalLatency = maxLatPlusDrop;
 
     int lat0 = totalLatency - latencies[0] - drops[0];
-    totalLatency = ceil(double(lat0 / m_p.fftHop) * m_p.fftHop)
+    totalLatency = ceil(cq_float(lat0 / m_p.fftHop) * m_p.fftHop)
 	+ latencies[0] + drops[0];
 
     // We want (totalLatency - latencies[i]) to be a multiple of 2^i
     // for each octave i, so that we do not end up with fractional
     // octave latencies below. In theory this is hard, in practice if
     // we ensure it for the last octave we should be OK.
-    double finalOctLat = latencies[m_octaves-1];
-    double finalOctFact = pow(2, m_octaves-1);
+    cq_float finalOctLat = latencies[m_octaves-1];
+    cq_float finalOctFact = pow(2, m_octaves-1);
     totalLatency =
         int(finalOctLat +
             finalOctFact *
@@ -228,7 +228,7 @@ ConstantQ::initialise()
 
     for (int i = 0; i < m_octaves; ++i) {
 
-	double factor = pow(2, i);
+	cq_float factor = pow(2, i);
 
 	// Calculate the difference between the total latency applied
 	// across all octaves, and the existing latency due to the
@@ -237,8 +237,8 @@ ConstantQ::initialise()
 	// decimator -- including one additional big block of padding
 	// (as in the reference).
 
-	double octaveLatency =
-	    double(totalLatency - latencies[i] - drops[i]
+	cq_float octaveLatency =
+	    cq_float(totalLatency - latencies[i] - drops[i]
 		   + m_bigBlockSize) / factor;
 
 #ifdef DEBUG_CQ
@@ -250,7 +250,7 @@ ConstantQ::initialise()
              << factor << " = "
              << (octaveLatency - round(octaveLatency)) * factor << ")" << endl;
 
-        cerr << "double(" << totalLatency << " - " 
+        cerr << "cq_float(" << totalLatency << " - " 
              << latencies[i] << " - " << drops[i] << " + " 
              << m_bigBlockSize << ") / " << factor << " = " 
              << octaveLatency << endl;
@@ -331,7 +331,7 @@ ConstantQ::ComplexBlock
 ConstantQ::getRemainingOutput()
 {
     // Same as padding added at start, though rounded up
-    int pad = ceil(double(m_outputLatency) / m_bigBlockSize) * m_bigBlockSize;
+    int pad = ceil(cq_float(m_outputLatency) / m_bigBlockSize) * m_bigBlockSize;
     RealSequence zeros(pad, 0.0);
     return process(zeros);
 }

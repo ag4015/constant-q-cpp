@@ -32,6 +32,7 @@
 #ifndef CQBASE_H
 #define CQBASE_H
 
+#include "ConstantQConfig.h"
 #include <vector>
 #include <complex>
 
@@ -43,13 +44,13 @@ class CQBase
 {
 public:
     /// A single complex-valued sample.
-    typedef std::complex<double> Complex;
+    typedef std::complex<cq_float> Complex;
 
     /// A series of real-valued samples ordered in time.
-    typedef std::vector<double> RealSequence;
+    typedef std::vector<cq_float> RealSequence;
 
     /// A series of real-valued samples ordered by bin (frequency or similar).
-    typedef std::vector<double> RealColumn;
+    typedef std::vector<cq_float> RealColumn;
 
     /// A series of complex-valued samples ordered in time.
     typedef std::vector<Complex> ComplexSequence;
@@ -73,7 +74,7 @@ public:
      * Return the sample rate used when constructing the specific
      * Constant-Q implementation.
      */
-    virtual double getSampleRate() const = 0;
+    virtual cq_float getSampleRate() const = 0;
 
     /**
      * Return the number of bins per octave specified when
@@ -111,7 +112,7 @@ public:
      * be the same as the maximum frequency passed to the constructor
      * of the specific Constant-Q implementation.
      */
-    virtual double getMaxFrequency() const = 0;
+    virtual cq_float getMaxFrequency() const = 0;
 
     /**
      * Return the minimum frequency of the Constant-Q output, i.e. the
@@ -120,14 +121,14 @@ public:
      * the same as any minimum frequency requested when constructing
      * the Constant-Q implementation.
      */
-    virtual double getMinFrequency() const = 0;
+    virtual cq_float getMinFrequency() const = 0;
 
     /**
      * Return the frequency of a given bin in the Constant-Q
      * output. This actually maps a continuous "bin scale" value to 
      * frequency: the bin parameter does not have to be an integer.
      */
-    virtual double getBinFrequency(double bin) const = 0;
+    virtual cq_float getBinFrequency(cq_float bin) const = 0;
 };
 
 #endif

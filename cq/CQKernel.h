@@ -48,9 +48,9 @@ public:
     bool isValid() const { return m_valid; }
     
     struct Properties {
-        double sampleRate;
-        double maxFrequency;
-        double minFrequency;
+        cq_float sampleRate;
+        cq_float maxFrequency;
+        cq_float minFrequency;
         int binsPerOctave;
         int fftSize;
         int fftHop;
@@ -58,16 +58,16 @@ public:
         int atomSpacing;
         int firstCentre;
         int lastCentre;
-        double Q;
+        cq_float Q;
     };
 
     Properties getProperties() const { return m_p; }
 
-    std::vector<std::complex<double> > processForward
-        (const std::vector<std::complex<double> > &);
+    std::vector<std::complex<cq_float> > processForward
+        (const std::vector<std::complex<cq_float> > &);
 
-    std::vector<std::complex<double> > processInverse
-        (const std::vector<std::complex<double> > &);
+    std::vector<std::complex<cq_float> > processInverse
+        (const std::vector<std::complex<cq_float> > &);
 
 private:
     const CQParameters m_inparams;
@@ -77,11 +77,11 @@ private:
 
     struct KernelMatrix {
         std::vector<int> origin;
-        std::vector<std::vector<std::complex<double> > > data;
+        std::vector<std::vector<std::complex<cq_float> > > data;
     };
     KernelMatrix m_kernel;
 
-    std::vector<double> makeWindow(int len) const;
+    std::vector<cq_float> makeWindow(int len) const;
     bool generateKernel();
     void finaliseKernel();
 };

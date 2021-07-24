@@ -48,7 +48,7 @@ public:
 protected:
     bool m_midiPitchParameters;
     
-    Vamp::Plugin *createPlugin(float inputSampleRate) {
+    Vamp::Plugin *createPlugin(cq_float inputSampleRate) {
         return new CQVamp(inputSampleRate, m_midiPitchParameters);
     }
 };

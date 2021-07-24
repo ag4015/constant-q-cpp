@@ -41,7 +41,7 @@ class Chromagram
 {
 public:
     struct Parameters {
-	Parameters(double sr) :
+	Parameters(cq_float sr) :
 	    sampleRate(sr),
 	    lowestOctave(0),
 	    octaveCount(7),
@@ -56,7 +56,7 @@ public:
         /**
          * Sampling rate of input signal.
          */
-	double sampleRate;
+	cq_float sampleRate;
 
         /**
          * Octave number of lowest octave to include in the
@@ -83,24 +83,24 @@ public:
          * octave extents into frequency extents for the constant-Q
          * transform.
          */
-	double tuningFrequency;
+	cq_float tuningFrequency;
 
         /**
          * Spectral atom bandwidth scaling factor.
          */
-        double q;
+        cq_float q;
         
         /**
          * Hop size between temporal atoms, where 1 == no overlap and
          * smaller values indicate overlapping atoms.
          */
-        double atomHopFactor;
+        cq_float atomHopFactor;
         
         /**
          * Sparsity threshold for Constant-Q kernel: values with
          * magnitude smaller than this are truncated to zero.
          */
-        double threshold;
+        cq_float threshold;
 
         /**
          * Window shape to use for the Constant-Q kernel atoms.
@@ -114,8 +114,8 @@ public:
     CQBase::RealBlock process(const CQBase::RealSequence &);
     CQBase::RealBlock getRemainingOutput();
 
-    double getMinFrequency() const { return m_minFrequency; }
-    double getMaxFrequency() const { return m_maxFrequency; }
+    cq_float getMinFrequency() const { return m_minFrequency; }
+    cq_float getMaxFrequency() const { return m_maxFrequency; }
 
     std::string getBinName(int bin) const;
     
@@ -126,8 +126,8 @@ public:
 private:
     Parameters m_params;
     CQSpectrogram *m_cq;
-    double m_minFrequency;
-    double m_maxFrequency;
+    cq_float m_minFrequency;
+    cq_float m_maxFrequency;
     CQBase::RealBlock convert(const CQBase::RealBlock &);
 };
 

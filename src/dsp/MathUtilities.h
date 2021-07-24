@@ -46,57 +46,57 @@ public:
     /**
      * Round x to the nearest integer.
      */
-    static double round( double x );
+    static cq_float round( cq_float x );
 
     /**
      * Return through min and max pointers the highest and lowest
      * values in the given array of the given length.
      */
-    static void	  getFrameMinMax( const double* data, unsigned int len,  double* min, double* max );
+    static void	  getFrameMinMax( const cq_float* data, unsigned int len,  cq_float* min, cq_float* max );
 
     /**
      * Return the mean of the given array of the given length.
      */
-    static double mean( const double* src, unsigned int len );
+    static cq_float mean( const cq_float* src, unsigned int len );
 
     /**
      * Return the mean of the subset of the given vector identified by
      * start and count.
      */
-    static double mean( const std::vector<double> &data,
+    static cq_float mean( const std::vector<cq_float> &data,
                         unsigned int start, unsigned int count );
     
     /**
      * Return the sum of the values in the given array of the given
      * length.
      */
-    static double sum( const double* src, unsigned int len );
+    static cq_float sum( const cq_float* src, unsigned int len );
 
     /**
      * Return the median of the values in the given array of the given
      * length. If the array is even in length, the returned value will
      * be half-way between the two values adjacent to median.
      */
-    static double median( const double* src, unsigned int len );
+    static cq_float median( const cq_float* src, unsigned int len );
 
     /**
      * The principle argument function. Map the phase angle ang into
      * the range [-pi,pi).
      */
-    static double princarg( double ang );
+    static cq_float princarg( cq_float ang );
 
     /**
      * Floating-point division modulus: return x % y.
      */
-    static double mod( double x, double y);
+    static cq_float mod( cq_float x, cq_float y);
 
-    static void	  getAlphaNorm(const double *data, unsigned int len, unsigned int alpha, double* ANorm);
-    static double getAlphaNorm(const std::vector <double> &data, unsigned int alpha );
+    static void	  getAlphaNorm(const cq_float *data, unsigned int len, unsigned int alpha, cq_float* ANorm);
+    static cq_float getAlphaNorm(const std::vector <cq_float> &data, unsigned int alpha );
 
-    static void   circShift( double* data, int length, int shift);
+    static void   circShift( cq_float* data, int length, int shift);
 
-    static int	  getMax( double* data, unsigned int length, double* max = 0 );
-    static int	  getMax( const std::vector<double> &data, double* max = 0 );
+    static int	  getMax( cq_float* data, unsigned int length, cq_float* max = 0 );
+    static int	  getMax( const std::vector<cq_float> &data, cq_float* max = 0 );
     static int    compareInt(const void * a, const void * b);
 
     enum NormaliseType {
@@ -105,17 +105,17 @@ public:
         NormaliseUnitMax
     };
 
-    static void normalise(double *data, int length,
+    static void normalise(cq_float *data, int length,
                           NormaliseType n = NormaliseUnitMax);
 
-    static void normalise(std::vector<double> &data,
+    static void normalise(std::vector<cq_float> &data,
                           NormaliseType n = NormaliseUnitMax);
 
     /**
      * Threshold the input/output vector data against a moving-mean
      * average filter.
      */
-    static void adaptiveThreshold(std::vector<double> &data);
+    static void adaptiveThreshold(std::vector<cq_float> &data);
 
     /** 
      * Return true if x is 2^n for some integer n >= 0.
@@ -143,7 +143,7 @@ public:
     /**
      * Return x!
      */
-    static double factorial(int x); // returns double in case it is large
+    static cq_float factorial(int x); // returns cq_float in case it is large
 
     /**
      * Return the greatest common divisor of natural numbers a and b.

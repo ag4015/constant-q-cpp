@@ -30,11 +30,11 @@ BOOST_AUTO_TEST_CASE(round)
 BOOST_AUTO_TEST_CASE(mean)
 {
     BOOST_CHECK_EQUAL(MathUtilities::mean(0, 0), 0);
-    double d0[] = { 0, 4, 3, -1 };
+    cq_float d0[] = { 0, 4, 3, -1 };
     BOOST_CHECK_EQUAL(MathUtilities::mean(d0, 4), 1.5);
-    double d1[] = { -2.6 };
+    cq_float d1[] = { -2.6 };
     BOOST_CHECK_EQUAL(MathUtilities::mean(d1, 1), -2.6);
-    std::vector<double> v;
+    std::vector<cq_float> v;
     v.push_back(0);
     v.push_back(4);
     v.push_back(3);
@@ -48,22 +48,22 @@ BOOST_AUTO_TEST_CASE(mean)
 BOOST_AUTO_TEST_CASE(sum)
 {
     BOOST_CHECK_EQUAL(MathUtilities::sum(0, 0), 0);
-    double d0[] = { 0, 4, 3, -1 };
+    cq_float d0[] = { 0, 4, 3, -1 };
     BOOST_CHECK_EQUAL(MathUtilities::sum(d0, 4), 6);
-    double d1[] = { -2.6 };
+    cq_float d1[] = { -2.6 };
     BOOST_CHECK_EQUAL(MathUtilities::sum(d1, 1), -2.6);
 }
 
 BOOST_AUTO_TEST_CASE(median)
 {
     BOOST_CHECK_EQUAL(MathUtilities::median(0, 0), 0);
-    double d0[] = { 0, 4, 3, -1 };
+    cq_float d0[] = { 0, 4, 3, -1 };
     BOOST_CHECK_EQUAL(MathUtilities::median(d0, 4), 1.5);
-    double d1[] = { 0, 4, 3, -1, -1 };
+    cq_float d1[] = { 0, 4, 3, -1, -1 };
     BOOST_CHECK_EQUAL(MathUtilities::median(d1, 5), 0);
-    double d2[] = { 1.0, -2.0 };
+    cq_float d2[] = { 1.0, -2.0 };
     BOOST_CHECK_EQUAL(MathUtilities::median(d2, 2), -0.5);
-    double d3[] = { -2.6 };
+    cq_float d3[] = { -2.6 };
     BOOST_CHECK_EQUAL(MathUtilities::median(d3, 1), -2.6);
 }
 
@@ -132,7 +132,7 @@ BOOST_AUTO_TEST_CASE(factorial)
     BOOST_CHECK_EQUAL(MathUtilities::factorial(3), 6.0);
     BOOST_CHECK_EQUAL(MathUtilities::factorial(4), 24.0);
 
-    // Too big for an int, hence double return value from factorial
+    // Too big for an int, hence cq_float return value from factorial
     BOOST_CHECK_EQUAL(MathUtilities::factorial(20), 2432902008176640000.0);
 }
 

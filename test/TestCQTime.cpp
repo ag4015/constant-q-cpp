@@ -24,17 +24,17 @@ BOOST_AUTO_TEST_SUITE(TestCQTime)
 
 // Set up fs/2 = 50, frequency range 10 -> 40 i.e. 2 octaves, fixed
 // duration of 2 seconds
-static const double sampleRate = 100;
-static const double cqmin = 10;
-static const double cqmax = 40;
-static const double bpo = 4;
+static const cq_float sampleRate = 100;
+static const cq_float cqmin = 10;
+static const cq_float cqmax = 40;
+static const cq_float bpo = 4;
 static const int duration = sampleRate * 2;
 
 // Threshold below which to ignore a column completely
-static const double threshold = 0.08;
+static const cq_float threshold = 0.08;
 
 void
-testCQTime(double t)
+testCQTime(cq_float t)
 {
     vector<CQSpectrogram::Interpolation> interpolationTypes;
     interpolationTypes.push_back(CQSpectrogram::InterpolateZeros);
@@ -51,7 +51,7 @@ testCQTime(double t)
         BOOST_CHECK_EQUAL(cq.getBinsPerOctave(), bpo);
         BOOST_CHECK_EQUAL(cq.getOctaves(), 2);
 
-        vector<double> input(duration, 0.0);
+        vector<cq_float> input(duration, 0.0);
         int ix = int(floor(t * sampleRate));
         if (ix >= duration) ix = duration-1;
         input[ix] = 1.0;
@@ -64,14 +64,14 @@ testCQTime(double t)
                           cq.getBinsPerOctave() * cq.getOctaves());
 
         vector<int> peaks;
-        double eps = 1e-8;
+        cq_float eps = 1e-8;
 
         for (int j = 0; j < int(output[0].size()); ++j) {
 
             int maxidx = -1;
-            double max = 0.0;
+            cq_float max = 0.0;
             for (int i = 0; i < int(output.size()); ++i) {
-                double value = output[i][j];
+                cq_float value = output[i][j];
                 if (i == 0 || value + eps > max) {
                     max = value;
                     maxidx = i;
@@ -85,7 +85,7 @@ testCQTime(double t)
             int oct = j / bpo;
             int spacing = (1 << oct);
             int actual = peaks[j]/spacing;
-            int expected = int(round(double(peaks[0])/spacing));
+            int expected = int(round(cq_float(peaks[0])/spacing));
             if (actual != expected) {
                 cerr << "ERROR: In row " << j << " (bin freq "
                      << cq.getBinFrequency(j) << "), interpolation " << interp

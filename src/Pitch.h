@@ -32,6 +32,8 @@
 #ifndef _PITCH_H_
 #define _PITCH_H_
 
+#include "ConstantQConfig.h"
+
 /**
  * Convert between musical pitch (i.e. MIDI pitch number) and
  * fundamental frequency.
@@ -39,13 +41,13 @@
 class Pitch
 {
 public:
-    static float getFrequencyForPitch(int midiPitch,
-				      float centsOffset = 0,
-				      float concertA = 440.0);
+    static cq_float getFrequencyForPitch(int midiPitch,
+				      cq_float centsOffset = 0,
+				      cq_float concertA = 440.0);
 
-    static int getPitchForFrequency(float frequency,
-				    float *centsOffsetReturn = 0,
-				    float concertA = 440.0);
+    static int getPitchForFrequency(cq_float frequency,
+				    cq_float *centsOffsetReturn = 0,
+				    cq_float concertA = 440.0);
 };
 
 

@@ -32,6 +32,7 @@
 #ifndef KAISER_WINDOW_H
 #define KAISER_WINDOW_H
 
+#include "ConstantQConfig.h"
 #include <vector>
 #include <cmath>
 
@@ -47,7 +48,7 @@ class KaiserWindow
 public:
     struct Parameters {
 	int length;
-	double beta;
+	cq_float beta;
     };
 
     /**
@@ -60,8 +61,8 @@ public:
      * Construct a Kaiser windower with the given attenuation in dB
      * and transition width in samples.
      */
-    static KaiserWindow byTransitionWidth(double attenuation,
-					  double transition) {
+    static KaiserWindow byTransitionWidth(cq_float attenuation,
+					  cq_float transition) {
 	return KaiserWindow
 	    (parametersForTransitionWidth(attenuation, transition));
     }
@@ -70,9 +71,9 @@ public:
      * Construct a Kaiser windower with the given attenuation in dB
      * and transition bandwidth in Hz for the given samplerate.
      */
-    static KaiserWindow byBandwidth(double attenuation,
-				    double bandwidth,
-				    double samplerate) {
+    static KaiserWindow byBandwidth(cq_float attenuation,
+				    cq_float bandwidth,
+				    cq_float samplerate) {
 	return KaiserWindow
 	    (parametersForBandwidth(attenuation, bandwidth, samplerate));
     }
@@ -81,17 +82,17 @@ public:
      * Obtain the parameters necessary for a Kaiser window of the
      * given attenuation in dB and transition width in samples.
      */
-    static Parameters parametersForTransitionWidth(double attenuation,
-						   double transition);
+    static Parameters parametersForTransitionWidth(cq_float attenuation,
+						   cq_float transition);
 
     /**
      * Obtain the parameters necessary for a Kaiser window of the
      * given attenuation in dB and transition bandwidth in Hz for the
      * given samplerate.
      */
-    static Parameters parametersForBandwidth(double attenuation,
-					     double bandwidth,
-					     double samplerate) {
+    static Parameters parametersForBandwidth(cq_float attenuation,
+					     cq_float bandwidth,
+					     cq_float samplerate) {
 	return parametersForTransitionWidth
 	    (attenuation, (bandwidth * 2 * M_PI) / samplerate);
     } 
@@ -100,15 +101,15 @@ public:
 	return m_length;
     }
 
-    const double *getWindow() const { 
+    const cq_float *getWindow() const { 
 	return m_window.data();
     }
 
-    void cut(double *src) const { 
+    void cut(cq_float *src) const { 
 	cut(src, src); 
     }
 
-    void cut(const double *src, double *dst) const {
+    void cut(const cq_float *src, cq_float *dst) const {
 	for (int i = 0; i < m_length; ++i) {
 	    dst[i] = src[i] * m_window[i];
 	}
@@ -116,8 +117,8 @@ public:
 
 private:
     int m_length;
-    double m_beta;
-    std::vector<double> m_window;
+    cq_float m_beta;
+    std::vector<cq_float> m_window;
 
     void init();
 };

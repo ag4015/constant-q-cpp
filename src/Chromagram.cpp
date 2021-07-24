@@ -44,7 +44,7 @@ Chromagram::Chromagram(Parameters params) :
     int highestOctave = m_params.lowestOctave + m_params.octaveCount - 1;
 
     int midiPitchLimit = (1 + highestOctave) * 12 + 12; // C just beyond top
-    double midiPitchLimitFreq = Pitch::getFrequencyForPitch
+    cq_float midiPitchLimitFreq = Pitch::getFrequencyForPitch
         (midiPitchLimit, 0, m_params.tuningFrequency);
 
     // Max frequency is frequency of the MIDI pitch just beyond the
@@ -100,9 +100,9 @@ Chromagram::getBinName(int bin) const
         "C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"
     };
 
-    float freq = m_cq->getBinFrequency(m_params.binsPerOctave - bin - 1);
+    cq_float freq = m_cq->getBinFrequency(m_params.binsPerOctave - bin - 1);
     int note = Pitch::getPitchForFrequency(freq, 0, m_params.tuningFrequency);
-    float nearestFreq =
+    cq_float nearestFreq =
         Pitch::getFrequencyForPitch(note, 0, m_params.tuningFrequency);
     
     char name[40];

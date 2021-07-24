@@ -50,11 +50,11 @@ using std::endl;
 static const int defaultMinMIDIPitch = 36;
 static const int defaultMaxMIDIPitch = 96;
 static const int defaultBPO = 36;
-static const float defaultMinFrequency = 110;
-static const float defaultMaxFrequency = 14700;
-static const float defaultTuningFrequency = 440.f;
+static const cq_float defaultMinFrequency = 110;
+static const cq_float defaultMaxFrequency = 14700;
+static const cq_float defaultTuningFrequency = 440.f;
 
-CQVamp::CQVamp(float inputSampleRate, bool midiPitchParameters) :
+CQVamp::CQVamp(cq_float inputSampleRate, bool midiPitchParameters) :
     Vamp::Plugin(inputSampleRate),
     m_midiPitchParameters(midiPitchParameters),
     m_minMIDIPitch(defaultMinMIDIPitch),
@@ -239,7 +239,7 @@ CQVamp::getParameterDescriptors() const
     return list;
 }
 
-float
+cq_float
 CQVamp::getParameter(std::string param) const
 {
     if (param == "minpitch" && m_midiPitchParameters) {
@@ -255,7 +255,7 @@ CQVamp::getParameter(std::string param) const
         return m_bpo;
     }
     if (param == "interpolation") {
-        return (float)m_interpolation;
+        return (cq_float)m_interpolation;
     }
     if (param == "minfreq" && !m_midiPitchParameters) {
         return m_minFrequency;
@@ -275,7 +275,7 @@ CQVamp::getParameter(std::string param) const
 }
 
 void
-CQVamp::setParameter(std::string param, float value)
+CQVamp::setParameter(std::string param, cq_float value)
 {
     if (param == "minpitch" && m_midiPitchParameters) {
         m_minMIDIPitch = int(value + 0.5f);
@@ -337,7 +337,7 @@ CQVamp::reset()
 {
     delete m_cq;
     CQParameters p(m_inputSampleRate, m_minFrequency, m_maxFrequency, m_bpo);
-    p.atomHopFactor = 1.0 / double(m_atomOverlap);
+    p.atomHopFactor = 1.0 / cq_float(m_atomOverlap);
     p.decimator = (m_useDraftDecimator ?
                    CQParameters::FasterDecimator :
                    CQParameters::BetterDecimator);
@@ -389,10 +389,10 @@ CQVamp::getOutputDescriptors() const
     if (m_cq) {
         char name[20];
         for (int i = 0; i < (int)d.binCount; ++i) {
-            float freq = m_cq->getBinFrequency(d.binCount - i - 1);
+            cq_float freq = m_cq->getBinFrequency(d.binCount - i - 1);
             sprintf(name, "%.1f Hz", freq);
             int note = Pitch::getPitchForFrequency(freq, 0, m_tuningFrequency);
-            float nearestFreq =
+            cq_float nearestFreq =
                 Pitch::getFrequencyForPitch(note, 0, m_tuningFrequency);
             if (fabs(freq - nearestFreq) < 0.01) {
                 d.binNames.push_back(name + std::string(" ") + noteName(note));
@@ -412,7 +412,7 @@ CQVamp::getOutputDescriptors() const
 }
 
 CQVamp::FeatureSet
-CQVamp::process(const float *const *inputBuffers,
+CQVamp::process(const cq_float *const *inputBuffers,
 		Vamp::RealTime timestamp)
 {
     if (!m_cq) {
@@ -427,22 +427,22 @@ CQVamp::process(const float *const *inputBuffers,
         m_haveStartTime = true;
     }
 
-    vector<double> data;
+    vector<cq_float> data;
     for (int i = 0; i < m_blockSize; ++i) data.push_back(inputBuffers[0][i]);
     
-    vector<vector<double> > cqout = m_cq->process(data);
+    vector<vector<cq_float> > cqout = m_cq->process(data);
     return convertToFeatures(cqout);
 }
 
 CQVamp::FeatureSet
 CQVamp::getRemainingFeatures()
 {
-    vector<vector<double> > cqout = m_cq->getRemainingOutput();
+    vector<vector<cq_float> > cqout = m_cq->getRemainingOutput();
     return convertToFeatures(cqout);
 }
 
 CQVamp::FeatureSet
-CQVamp::convertToFeatures(const vector<vector<double> > &cqout)
+CQVamp::convertToFeatures(const vector<vector<cq_float> > &cqout)
 {
     FeatureSet returnFeatures;
 
@@ -451,7 +451,7 @@ CQVamp::convertToFeatures(const vector<vector<double> > &cqout)
 
     for (int i = 0; i < width; ++i) {
 
-	vector<float> column(height, 0.f);
+	vector<cq_float> column(height, 0.f);
         int thisHeight = cqout[i].size();
 	for (int j = 0; j < thisHeight; ++j) {
 	    column[j] = cqout[i][j];

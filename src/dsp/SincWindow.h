@@ -32,6 +32,7 @@
 #ifndef SINC_WINDOW_H
 #define SINC_WINDOW_H
 
+#include "ConstantQConfig.h"
 #include <vector>
 
 #include "pi.h"
@@ -50,21 +51,21 @@ public:
      * from -pi to pi (the nearest zero crossings either side of the
      * peak) is p samples.
      */
-    SincWindow(int length, double p) : m_length(length), m_p(p) { init(); }
+    SincWindow(int length, cq_float p) : m_length(length), m_p(p) { init(); }
 
     int getLength() const {
 	return m_length;
     }
 
-    const double *getWindow() const { 
+    const cq_float *getWindow() const { 
 	return m_window.data();
     }
 
-    void cut(double *src) const { 
+    void cut(cq_float *src) const { 
 	cut(src, src); 
     }
 
-    void cut(const double *src, double *dst) const {
+    void cut(const cq_float *src, cq_float *dst) const {
 	for (int i = 0; i < m_length; ++i) {
 	    dst[i] = src[i] * m_window[i];
 	}
@@ -72,8 +73,8 @@ public:
 
 private:
     int m_length;
-    double m_p;
-    std::vector<double> m_window;
+    cq_float m_p;
+    std::vector<cq_float> m_window;
 
     void init();
 };

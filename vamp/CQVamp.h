@@ -41,7 +41,7 @@ class ConstantQ;
 class CQVamp : public Vamp::Plugin
 {
 public:
-    CQVamp(float inputSampleRate, bool midiPitchParameters);
+    CQVamp(cq_float inputSampleRate, bool midiPitchParameters);
     virtual ~CQVamp();
 
     bool initialise(size_t channels, size_t stepSize, size_t blockSize);
@@ -57,15 +57,15 @@ public:
     std::string getCopyright() const;
 
     ParameterList getParameterDescriptors() const;
-    float getParameter(std::string) const;
-    void setParameter(std::string, float);
+    cq_float getParameter(std::string) const;
+    void setParameter(std::string, cq_float);
 
     size_t getPreferredStepSize() const;
     size_t getPreferredBlockSize() const;
 
     OutputList getOutputDescriptors() const;
 
-    FeatureSet process(const float *const *inputBuffers,
+    FeatureSet process(const cq_float *const *inputBuffers,
                        Vamp::RealTime timestamp);
 
     FeatureSet getRemainingFeatures();
@@ -74,15 +74,15 @@ protected:
     bool m_midiPitchParameters;
     int m_minMIDIPitch;
     int m_maxMIDIPitch;
-    float m_tuningFrequency;
+    cq_float m_tuningFrequency;
     int m_bpo;
     int m_atomOverlap;
     bool m_useDraftDecimator;
     CQSpectrogram::Interpolation m_interpolation;
 
     CQSpectrogram *m_cq;
-    float m_maxFrequency;
-    float m_minFrequency;
+    cq_float m_maxFrequency;
+    cq_float m_minFrequency;
     int m_stepSize;
     int m_blockSize;
 
@@ -92,8 +92,8 @@ protected:
 
     std::string noteName(int i) const;
 
-    std::vector<float> m_prevFeature;
-    FeatureSet convertToFeatures(const std::vector<std::vector<double> > &);
+    std::vector<cq_float> m_prevFeature;
+    FeatureSet convertToFeatures(const std::vector<std::vector<cq_float> > &);
 };
 
 

@@ -25,27 +25,27 @@ BOOST_AUTO_TEST_SUITE(TestCQFrequency)
 
 // Set up fs/2 = 50, frequency range 10 -> 40 i.e. 2 octaves, fixed
 // duration of 2 seconds
-static const double sampleRate = 100;
-static const double cqmin = 11.8921;
-static const double cqmax = 40;
-static const double bpo = 4;
+static const cq_float sampleRate = 100;
+static const cq_float cqmin = 11.8921;
+static const cq_float cqmax = 40;
+static const cq_float bpo = 4;
 static const int duration = sampleRate * 2;
 
 // Threshold below which to ignore a column completely
-static const double threshold = 0.08;
+static const cq_float threshold = 0.08;
 
 int
-binForFrequency(double freq)
+binForFrequency(cq_float freq)
 {
     int bin = (bpo * 2) - round(bpo * log2(freq / cqmin)) - 1;
     return bin;
 }
 
 void
-checkCQFreqColumn(int i, vector<double> column,
-                  double freq, CQSpectrogram::Interpolation interp)
+checkCQFreqColumn(int i, vector<cq_float> column,
+                  cq_float freq, CQSpectrogram::Interpolation interp)
 {
-    double maxval = 0.0;
+    cq_float maxval = 0.0;
     int maxidx = -1;
     int height = column.size();
 
@@ -78,7 +78,7 @@ checkCQFreqColumn(int i, vector<double> column,
 void
 testCQFrequencyWith(CQParameters params,
                     CQSpectrogram::Interpolation interp,
-                    double freq)
+                    cq_float freq)
 {
     CQSpectrogram cq(params, interp);
 
@@ -88,11 +88,11 @@ testCQFrequencyWith(CQParameters params,
     BOOST_CHECK_CLOSE(cq.getBinFrequency(4), 20, 1e-10);
     BOOST_CHECK_CLOSE(cq.getBinFrequency(7), cqmin, 1e-3);
     
-    vector<double> input;
+    vector<cq_float> input;
     for (int i = 0; i < duration; ++i) {
         input.push_back(sin((i * 2 * M_PI * freq) / sampleRate));
     }
-    Window<double>(HanningWindow, duration).cut(input.data());
+    Window<cq_float>(HanningWindow, duration).cut(input.data());
     
     CQSpectrogram::RealBlock output = cq.process(input);
     CQSpectrogram::RealBlock rest = cq.getRemainingOutput();
@@ -107,7 +107,7 @@ testCQFrequencyWith(CQParameters params,
 }
 
 void
-testCQFrequency(double freq)
+testCQFrequency(cq_float freq)
 {
     vector<CQSpectrogram::Interpolation> interpolationTypes;
     interpolationTypes.push_back(CQSpectrogram::InterpolateZeros);

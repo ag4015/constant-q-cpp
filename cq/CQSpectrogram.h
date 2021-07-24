@@ -64,15 +64,15 @@ public:
 
     // CQBase methods, see CQBase.h for documentation
     virtual bool isValid() const { return m_cq.isValid(); }
-    virtual double getSampleRate() const { return m_cq.getSampleRate(); }
+    virtual cq_float getSampleRate() const { return m_cq.getSampleRate(); }
     virtual int getBinsPerOctave() const { return m_cq.getBinsPerOctave(); }
     virtual int getOctaves() const { return m_cq.getOctaves(); }
     virtual int getTotalBins() const { return m_cq.getTotalBins(); }
     virtual int getColumnHop() const { return m_cq.getColumnHop(); }
     virtual int getLatency() const { return m_cq.getLatency(); } 
-    virtual double getMaxFrequency() const { return m_cq.getMaxFrequency(); }
-    virtual double getMinFrequency() const { return m_cq.getMinFrequency(); }
-    virtual double getBinFrequency(double bin) const { return m_cq.getBinFrequency(bin); }
+    virtual cq_float getMaxFrequency() const { return m_cq.getMaxFrequency(); }
+    virtual cq_float getMinFrequency() const { return m_cq.getMinFrequency(); }
+    virtual cq_float getBinFrequency(cq_float bin) const { return m_cq.getBinFrequency(bin); }
 
     /**
      * Given a series of time-domain samples, return a series of

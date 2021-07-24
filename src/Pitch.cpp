@@ -33,24 +33,24 @@
 
 #include <math.h>
 
-float
+cq_float
 Pitch::getFrequencyForPitch(int midiPitch,
-			    float centsOffset,
-			    float concertA)
+			    cq_float centsOffset,
+			    cq_float concertA)
 {
-    float p = float(midiPitch) + (centsOffset / 100);
+    cq_float p = cq_float(midiPitch) + (centsOffset / 100);
     return concertA * powf(2.0, (p - 69.0) / 12.0);
 }
 
 int
-Pitch::getPitchForFrequency(float frequency,
-			    float *centsOffsetReturn,
-			    float concertA)
+Pitch::getPitchForFrequency(cq_float frequency,
+			    cq_float *centsOffsetReturn,
+			    cq_float concertA)
 {
-    float p = 12.0 * (log(frequency / (concertA / 2.0)) / log(2.0)) + 57.0;
+    cq_float p = 12.0 * (log(frequency / (concertA / 2.0)) / log(2.0)) + 57.0;
 
     int midiPitch = int(p + 0.00001);
-    float centsOffset = (p - midiPitch) * 100.0;
+    cq_float centsOffset = (p - midiPitch) * 100.0;
 
     if (centsOffset >= 50.0) {
 	midiPitch = midiPitch + 1;

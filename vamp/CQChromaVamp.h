@@ -39,7 +39,7 @@ class Chromagram;
 class CQChromaVamp : public Vamp::Plugin
 {
 public:
-    CQChromaVamp(float inputSampleRate);
+    CQChromaVamp(cq_float inputSampleRate);
     virtual ~CQChromaVamp();
 
     bool initialise(size_t channels, size_t stepSize, size_t blockSize);
@@ -55,15 +55,15 @@ public:
     std::string getCopyright() const;
 
     ParameterList getParameterDescriptors() const;
-    float getParameter(std::string) const;
-    void setParameter(std::string, float);
+    cq_float getParameter(std::string) const;
+    void setParameter(std::string, cq_float);
 
     size_t getPreferredStepSize() const;
     size_t getPreferredBlockSize() const;
 
     OutputList getOutputDescriptors() const;
 
-    FeatureSet process(const float *const *inputBuffers,
+    FeatureSet process(const cq_float *const *inputBuffers,
                        Vamp::RealTime timestamp);
 
     FeatureSet getRemainingFeatures();
@@ -71,7 +71,7 @@ public:
 protected:
     int m_lowestOctave;
     int m_octaveCount;
-    float m_tuningFrequency;
+    cq_float m_tuningFrequency;
     int m_bpo;
 
     Chromagram *m_chroma;
@@ -82,7 +82,7 @@ protected:
     bool m_haveStartTime;
     int m_columnCount;
 
-    FeatureSet convertToFeatures(const std::vector<std::vector<double> > &);
+    FeatureSet convertToFeatures(const std::vector<std::vector<cq_float> > &);
 };
 
 

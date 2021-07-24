@@ -32,6 +32,7 @@
 #ifndef CONSTANTQ_H
 #define CONSTANTQ_H
 
+#include "ConstantQConfig.h"
 #include "CQBase.h"
 #include "CQParameters.h"
 #include "CQKernel.h"
@@ -60,15 +61,15 @@ public:
 
     // CQBase methods, see CQBase.h for documentation
     virtual bool isValid() const { return m_kernel && m_kernel->isValid(); }
-    virtual double getSampleRate() const { return m_sampleRate; }
+    virtual cq_float getSampleRate() const { return m_sampleRate; }
     virtual int getBinsPerOctave() const { return m_binsPerOctave; }
     virtual int getOctaves() const { return m_octaves; }
     virtual int getTotalBins() const { return m_octaves * m_binsPerOctave; }
     virtual int getColumnHop() const { return m_p.fftHop / m_p.atomsPerFrame; }
     virtual int getLatency() const { return m_outputLatency; } 
-    virtual double getMaxFrequency() const { return m_p.maxFrequency; }
-    virtual double getMinFrequency() const;
-    virtual double getBinFrequency(double bin) const; // bin may be nonintegral
+    virtual cq_float getMaxFrequency() const { return m_p.maxFrequency; }
+    virtual cq_float getMinFrequency() const;
+    virtual cq_float getBinFrequency(cq_float bin) const; // bin may be nonintegral
 
     /**
      * Given a series of time-domain samples, return a series of
@@ -105,9 +106,9 @@ public:
 
 private:
     const CQParameters m_inparams;
-    const double m_sampleRate;
-    const double m_maxFrequency;
-    const double m_minFrequency;
+    const cq_float m_sampleRate;
+    const cq_float m_maxFrequency;
+    const cq_float m_minFrequency;
     const int m_binsPerOctave;
 
     int m_octaves;

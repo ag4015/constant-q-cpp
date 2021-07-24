@@ -32,6 +32,8 @@
 #ifndef CQ_PARAMETERS_H
 #define CQ_PARAMETERS_H
 
+#include "ConstantQConfig.h"
+
 /**
  * Common parameters for constructing Constant-Q implementation
  * objects (both forward and inverse transforms).
@@ -60,9 +62,9 @@ public:
      * defaults; if you want to change them, just assign the
      * respective data members after construction.
      */
-    CQParameters(double _sampleRate, 
-		 double _minFrequency, 
-		 double _maxFrequency,
+    CQParameters(cq_float _sampleRate, 
+		 cq_float _minFrequency, 
+		 cq_float _maxFrequency,
 		 int _binsPerOctave) :
 	sampleRate(_sampleRate),
 	minFrequency(_minFrequency),
@@ -78,19 +80,19 @@ public:
     /**
      * Sampling rate of input signal.
      */
-    double sampleRate;
+    cq_float sampleRate;
 
     /**
      * Minimum frequency desired to include in Constant-Q output. The
      * actual minimum will normally be calculated as a round number of
      * octaves below the maximum frequency, and may differ from this.
      */
-    double minFrequency;
+    cq_float minFrequency;
 
     /**
      * Maximum frequency to include in Constant-Q output.
      */
-    double maxFrequency;
+    cq_float maxFrequency;
 
     /**
      * Number of output frequency bins per octave.
@@ -102,19 +104,19 @@ public:
      * reconstruction, q < 1 increases redundancy (smearing) in the
      * frequency domain but improves time resolution.
      */
-    double q;
+    cq_float q;
 
     /**
      * Hop size between temporal atoms, where 1 == no overlap and
      * smaller values indicate overlapping atoms.
      */
-    double atomHopFactor;
+    cq_float atomHopFactor;
 
     /**
      * Sparsity threshold for Constant-Q kernel: values with magnitude
      * smaller than this are truncated to zero.
      */
-    double threshold;
+    cq_float threshold;
 
     /**
      * Window shape to use for the Constant-Q kernel atoms.

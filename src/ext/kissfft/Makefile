@@ -1,4 +1,5 @@
 KFVER=130
+DATATYPE=double
 
 doc:
 	@echo "Start by reading the README file.  If you want to build and test lots of stuff, do a 'make testall'"

@@ -19,8 +19,8 @@ using std::endl;
 
 int main(int argc, char **argv)
 {
-    double maxFreq = 0;
-    double minFreq = 0;
+    cq_float maxFreq = 0;
+    cq_float minFreq = 0;
     int bpo = 0;
     bool help = false;
     
@@ -119,7 +119,7 @@ int main(int argc, char **argv)
 
     int ibs = 1024;
     int channels = sfinfo.channels;
-    float *fbuf = new float[channels * ibs];
+    cq_float *fbuf = new cq_float[channels * ibs];
 
     if (maxFreq == 0.0) maxFreq = sfinfo.samplerate / 3;
     if (minFreq == 0.0) minFreq = 100;
@@ -142,9 +142,9 @@ int main(int argc, char **argv)
     int outframe = 0;
     int latency = cq.getLatency() + cqi.getLatency();
 
-    vector<double> buffer;
+    vector<cq_float> buffer;
 
-    double maxdiff = 0.0;
+    cq_float maxdiff = 0.0;
     int maxdiffidx = 0;
 
     cerr << "forward latency = " << cq.getLatency() << ", inverse latency = " 
@@ -161,9 +161,9 @@ int main(int argc, char **argv)
 	    break;
 	}
 
-	vector<double> cqin;
+	vector<cq_float> cqin;
 	for (int i = 0; i < count; ++i) {
-	    double v = fbuf[i * channels];
+	    cq_float v = fbuf[i * channels];
 	    if (channels > 1) {
 		for (int c = 1; c < channels; ++c) {
 		    v += fbuf[i * channels + c];
@@ -177,7 +177,7 @@ int main(int argc, char **argv)
 	    buffer.insert(buffer.end(), cqin.begin(), cqin.end());
 	}
 	
-	vector<double> cqout = cqi.process(cq.process(cqin));
+	vector<cq_float> cqout = cqi.process(cq.process(cqin));
 
 	for (int i = 0; i < int(cqout.size()); ++i) {
 	    if (cqout[i] > 1.0) cqout[i] = 1.0;
@@ -232,8 +232,8 @@ int main(int argc, char **argv)
 	outframe += cqout.size();
     }
 
-    vector<double> r = cqi.process(cq.getRemainingOutput());
-    vector<double> r2 = cqi.getRemainingOutput();
+    vector<cq_float> r = cqi.process(cq.getRemainingOutput());
+    vector<cq_float> r2 = cqi.getRemainingOutput();
 
     r.insert(r.end(), r2.begin(), r2.end());
 
@@ -271,7 +271,7 @@ int main(int argc, char **argv)
     cerr << "in: " << inframe << ", out: " << outframe - latency << endl;
 
     if (doDiff) {
-	double db = 10 * log10(maxdiff);
+	cq_float db = 10 * log10(maxdiff);
 	cerr << "max diff [excluding first and last second of audio] is "
 	     << maxdiff << " (" << db << " dBFS)"
 	     << " at sample index " << maxdiffidx << endl;
@@ -287,7 +287,7 @@ int main(int argc, char **argv)
     }
     etv.tv_usec -= tv.tv_usec;
         
-    double sec = double(etv.tv_sec) + (double(etv.tv_usec) / 1000000.0);
+    cq_float sec = cq_float(etv.tv_sec) + (cq_float(etv.tv_usec) / 1000000.0);
     cerr << "elapsed time (not counting init): " << sec << " sec, frames/sec at input: " << inframe/sec << endl;
 
     return 0;

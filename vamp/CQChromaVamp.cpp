@@ -43,9 +43,9 @@ using std::endl;
 static const int defaultLowestOctave = 0;
 static const int defaultOctaveCount = 7;
 static const int defaultBPO = 36;
-static const float defaultTuningFrequency = 440.f;
+static const cq_float defaultTuningFrequency = 440.f;
 
-CQChromaVamp::CQChromaVamp(float inputSampleRate) :
+CQChromaVamp::CQChromaVamp(cq_float inputSampleRate) :
     Vamp::Plugin(inputSampleRate),
     m_lowestOctave(defaultLowestOctave),
     m_octaveCount(defaultOctaveCount),
@@ -151,7 +151,7 @@ CQChromaVamp::getParameterDescriptors() const
     return list;
 }
 
-float
+cq_float
 CQChromaVamp::getParameter(std::string param) const
 {
     if (param == "lowestoct") {
@@ -172,7 +172,7 @@ CQChromaVamp::getParameter(std::string param) const
 }
 
 void
-CQChromaVamp::setParameter(std::string param, float value)
+CQChromaVamp::setParameter(std::string param, cq_float value)
 {
     if (param == "lowestoct") {
         m_lowestOctave = int(value + 0.5f);
@@ -270,7 +270,7 @@ CQChromaVamp::getOutputDescriptors() const
 }
 
 CQChromaVamp::FeatureSet
-CQChromaVamp::process(const float *const *inputBuffers,
+CQChromaVamp::process(const cq_float *const *inputBuffers,
                       Vamp::RealTime timestamp)
 {
     if (!m_chroma) {
@@ -285,22 +285,22 @@ CQChromaVamp::process(const float *const *inputBuffers,
         m_haveStartTime = true;
     }
 
-    vector<double> data;
+    vector<cq_float> data;
     for (int i = 0; i < m_blockSize; ++i) data.push_back(inputBuffers[0][i]);
     
-    vector<vector<double> > chromaout = m_chroma->process(data);
+    vector<vector<cq_float> > chromaout = m_chroma->process(data);
     return convertToFeatures(chromaout);
 }
 
 CQChromaVamp::FeatureSet
 CQChromaVamp::getRemainingFeatures()
 {
-    vector<vector<double> > chromaout = m_chroma->getRemainingOutput();
+    vector<vector<cq_float> > chromaout = m_chroma->getRemainingOutput();
     return convertToFeatures(chromaout);
 }
 
 CQChromaVamp::FeatureSet
-CQChromaVamp::convertToFeatures(const vector<vector<double> > &chromaout)
+CQChromaVamp::convertToFeatures(const vector<vector<cq_float> > &chromaout)
 {
     FeatureSet returnFeatures;
 
@@ -308,7 +308,7 @@ CQChromaVamp::convertToFeatures(const vector<vector<double> > &chromaout)
 
     for (int i = 0; i < width; ++i) {
 
-	vector<float> column(chromaout[i].begin(), chromaout[i].end());
+	vector<cq_float> column(chromaout[i].begin(), chromaout[i].end());
 
 	Feature feature;
 	feature.hasTimestamp = true;

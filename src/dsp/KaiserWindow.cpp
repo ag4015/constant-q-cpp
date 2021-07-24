@@ -34,8 +34,8 @@
 #include "MathUtilities.h"
 
 KaiserWindow::Parameters
-KaiserWindow::parametersForTransitionWidth(double attenuation,
-					   double transition)
+KaiserWindow::parametersForTransitionWidth(cq_float attenuation,
+					   cq_float transition)
 {
     Parameters p;
     p.length = 1 + (attenuation > 21.0 ?
@@ -49,19 +49,19 @@ KaiserWindow::parametersForTransitionWidth(double attenuation,
     return p;
 }
 
-static double besselTerm(double x, int i)
+static cq_float besselTerm(cq_float x, int i)
 {
     if (i == 0) {
 	return 1;
     } else {
-	double f = MathUtilities::factorial(i);
+	cq_float f = MathUtilities::factorial(i);
 	return pow(x/2, i*2) / (f*f);
     }
 }
 
-static double bessel0(double x)
+static cq_float bessel0(cq_float x)
 {
-    double b = 0.0;
+    cq_float b = 0.0;
     for (int i = 0; i < 20; ++i) {
 	b += besselTerm(x, i);
     }
@@ -71,10 +71,10 @@ static double bessel0(double x)
 void
 KaiserWindow::init()
 {
-    double denominator = bessel0(m_beta);
+    cq_float denominator = bessel0(m_beta);
     bool even = (m_length % 2 == 0);
     for (int i = 0; i < (even ? m_length/2 : (m_length+1)/2); ++i) {
-	double k = double(2*i) / double(m_length-1) - 1.0;
+	cq_float k = cq_float(2*i) / cq_float(m_length-1) - 1.0;
 	m_window.push_back(bessel0(m_beta * sqrt(1.0 - k*k)) / denominator);
     }
     for (int i = 0; i < (even ? m_length/2 : (m_length-1)/2); ++i) {
