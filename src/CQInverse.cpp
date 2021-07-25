@@ -74,7 +74,7 @@ CQInverse::~CQInverse()
 cq_float
 CQInverse::getMinFrequency() const
 {
-    return m_p.minFrequency / pow(2.0, m_octaves - 1);
+    return m_p.minFrequency / POW(2.0, m_octaves - 1);
 }
 
 cq_float
@@ -82,7 +82,7 @@ CQInverse::getBinFrequency(cq_float bin) const
 {
     // our bins are returned in high->low order
     bin = (getBinsPerOctave() * getOctaves()) - bin - 1;
-    return getMinFrequency() * pow(2, (bin / getBinsPerOctave()));
+    return getMinFrequency() * POW(2, (bin / getBinsPerOctave()));
 }
 
 void
@@ -104,7 +104,7 @@ CQInverse::initialise()
     // target rates, and if we start from the actual samplerate we
     // risk getting non-integer rates for lower octaves
 
-    int sourceRate = pow(2, m_octaves);
+    int sourceRate = static_cast<int>(POW(2, m_octaves));
     vector<int> latencies;
 
     // top octave, no resampling
@@ -113,10 +113,10 @@ CQInverse::initialise()
 
     for (int i = 1; i < m_octaves; ++i) {
 
-        int factor = pow(2, i);
+        int factor = static_cast<int>(POW(2, i));
 
         Resampler *r = new Resampler
-            (sourceRate / factor, sourceRate, 50, 0.05);
+            (sourceRate / factor, sourceRate, 50, 0.05f);
 
 #ifdef DEBUG_CQ
         cerr << "inverse: octave " << i << ": resample from " << sourceRate/factor << " to " << sourceRate << endl;
@@ -133,7 +133,7 @@ CQInverse::initialise()
     // additionally we will have fftHop latency at individual octave
     // rate (before upsampling) for the overlap-add in each octave
     for (int i = 0; i < m_octaves; ++i) {
-        latencies[i] += m_p.fftHop * pow(2, i);
+        latencies[i] += m_p.fftHop * static_cast<int>(POW(2, i));
     }
 
     // Now reverse the drop adjustment made in ConstantQ to align the
@@ -144,8 +144,8 @@ CQInverse::initialise()
 
     vector<int> pushes;
     for (int i = 0; i < m_octaves; ++i) {
-	int factor = pow(2, i);
-	int pushHops = emptyHops * pow(2, m_octaves - i - 1) - emptyHops;
+	int factor = static_cast<int>(POW(2, i));
+	int pushHops = emptyHops * static_cast<int>(POW(2, m_octaves - i - 1)) - emptyHops;
 	int push = ((pushHops * m_p.fftHop) * factor) / m_p.atomsPerFrame;
 	pushes.push_back(push);
     }
@@ -159,7 +159,7 @@ CQInverse::initialise()
     int totalLatency = maxLatLessPush + 10;
     if (totalLatency < 0) totalLatency = 0;
 
-    m_outputLatency = totalLatency + m_p.firstCentre * pow(2, m_octaves-1);
+    m_outputLatency = totalLatency + m_p.firstCentre * static_cast<int>(POW(2, m_octaves-1));
 
 #ifdef DEBUG_CQ
     cerr << "totalLatency = " << totalLatency << ", m_outputLatency = " << m_outputLatency << endl;
@@ -174,7 +174,7 @@ CQInverse::initialise()
         int latencyPadding = totalLatency - latencies[i] + pushes[i];
 
 #ifdef DEBUG_CQ
-        cerr << "octave " << i << ": push " << pushes[i] << ", resampler latency inc overlap space " << latencies[i] << ", latencyPadding = " << latencyPadding << " (/factor = " << latencyPadding / pow(2, i) << ")" << endl;
+        cerr << "octave " << i << ": push " << pushes[i] << ", resampler latency inc overlap space " << latencies[i] << ", latencyPadding = " << latencyPadding << " (/factor = " << latencyPadding / POW(2, i) << ")" << endl;
 #endif
 
         m_buffers.push_back(RealSequence(latencyPadding, 0.0));
@@ -197,13 +197,13 @@ CQInverse::process(const ComplexBlock &block)
     // be the case for data that came directly from our ConstantQ
     // implementation.
 
-    int widthProvided = block.size();
+    int widthProvided = static_cast<int>(block.size());
 
     if (widthProvided == 0) {
         return drawFromBuffers();
     }
 
-    int blockWidth = m_p.atomsPerFrame * int(pow(2, m_octaves - 1));
+    int blockWidth = m_p.atomsPerFrame * int(POW(2, m_octaves - 1));
 
     if (widthProvided % blockWidth != 0) {
         cerr << "ERROR: CQInverse::process: Input block size ("
@@ -244,12 +244,12 @@ CQInverse::process(const ComplexBlock &block)
         ComplexBlock oct;
 
         for (int j = 0; j < widthProvided; ++j) {
-            int h = block[j].size();
+            int h = static_cast<int>(block[j].size());
             if (h < m_binsPerOctave * (i+1)) {
                 continue;
             }
-            ComplexColumn col(block[j].begin() + m_binsPerOctave * i,
-                              block[j].begin() + m_binsPerOctave * (i+1));
+            ComplexColumn col(block[j].begin() + static_cast<uint64_t>(m_binsPerOctave) * static_cast<uint64_t>(i),
+                              block[j].begin() + static_cast<uint64_t>(m_binsPerOctave) * (static_cast<uint64_t>(i)+1));
             oct.push_back(col);
         }
 
@@ -270,7 +270,7 @@ CQInverse::drawFromBuffers()
 
     for (int i = 0; i < m_octaves; ++i) {
         if (i == 0 || int(m_buffers[i].size()) < available) {
-            available = m_buffers[i].size();
+            available = static_cast<int>(m_buffers[i].size());
         }
     }
 
@@ -295,7 +295,7 @@ CQInverse::RealSequence
 CQInverse::getRemainingOutput()
 {
     for (int j = 0; j < m_octaves; ++j) {
-        int factor = pow(2, j);
+        int factor = static_cast<int>(POW(2, j));
         int latency = (j > 0 ? m_upsamplers[j]->getLatency() : 0) / factor;
         for (int i = 0; i < (latency + m_p.fftSize) / m_p.fftHop; ++i) {
             overlapAddAndResample(j, RealSequence(m_olaBufs[j].size(), 0));
@@ -312,7 +312,7 @@ CQInverse::processOctave(int octave, const ComplexBlock &columns)
     // and stack these so as to achieve a list, for each octave, of
     // taller columns of height binsPerOctave * atomsPerFrame
 
-    int ncols = columns.size();
+    int ncols = static_cast<int>(columns.size());
 
     if (ncols % m_p.atomsPerFrame != 0) {
         cerr << "ERROR: CQInverse::process: Number of columns ("
@@ -324,10 +324,10 @@ CQInverse::processOctave(int octave, const ComplexBlock &columns)
             ("Columns in octave must be a multiple of atoms per frame");
     }
 
-    for (int i = 0; i < ncols; i += m_p.atomsPerFrame) {
+    for (uint64_t i = 0; i < ncols; i += m_p.atomsPerFrame) {
 
         ComplexColumn tallcol;
-        for (int b = 0; b < m_binsPerOctave; ++b) {
+        for (uint64_t b = 0; b < m_binsPerOctave; ++b) {
             for (int a = 0; a < m_p.atomsPerFrame; ++a) {
                 tallcol.push_back(columns[i + a][m_binsPerOctave - b - 1]);
             }
@@ -396,7 +396,7 @@ CQInverse::overlapAddAndResample(int octave, const RealSequence &seq)
 
     RealSequence resampled = 
         octave > 0 ?
-        m_upsamplers[octave]->process(toResample.data(), toResample.size()) :
+        m_upsamplers[octave]->process(toResample.data(), static_cast<int>(toResample.size())) :
         toResample;
 
     m_buffers[octave].insert(m_buffers[octave].end(),

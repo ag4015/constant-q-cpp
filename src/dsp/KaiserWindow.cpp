@@ -38,13 +38,13 @@ KaiserWindow::parametersForTransitionWidth(cq_float attenuation,
 					   cq_float transition)
 {
     Parameters p;
-    p.length = 1 + (attenuation > 21.0 ?
-		    ceil((attenuation - 7.95) / (2.285 * transition)) :
-		    ceil(5.79 / transition));
-    p.beta = (attenuation > 50.0 ? 
-	      0.1102 * (attenuation - 8.7) :
-	      attenuation > 21.0 ? 
-	      0.5842 * pow(attenuation - 21.0, 0.4) + 0.07886 * (attenuation - 21.0) :
+    p.length = static_cast<int>(1 + (attenuation > 21.0f ?
+		    ceil((attenuation - 7.95f) / (2.285f * transition)) :
+		    ceil(5.79f / transition)));
+    p.beta = (attenuation > 50.0f ? 
+	      0.1102f * (attenuation - 8.7f) :
+	      attenuation > 21.0f ? 
+	      0.5842f * pow(attenuation - 21.0f, 0.4f) + 0.07886f * (attenuation - 21.0f) :
 	      0);
     return p;
 }
@@ -55,7 +55,14 @@ static cq_float besselTerm(cq_float x, int i)
 	return 1;
     } else {
 	cq_float f = MathUtilities::factorial(i);
-	return pow(x/2, i*2) / (f*f);
+#ifdef _WIN32 
+#pragma warning(push)
+#pragma warning(disable:26451)
+#endif  // Don't want double precision in a 32 bit system. Too expensive
+	return POW(x/2, i*2) / (f*f);
+#ifdef _WIN32
+#pragma warning(pop)
+#endif
     }
 }
 
@@ -74,10 +81,17 @@ KaiserWindow::init()
     cq_float denominator = bessel0(m_beta);
     bool even = (m_length % 2 == 0);
     for (int i = 0; i < (even ? m_length/2 : (m_length+1)/2); ++i) {
-	cq_float k = cq_float(2*i) / cq_float(m_length-1) - 1.0;
-	m_window.push_back(bessel0(m_beta * sqrt(1.0 - k*k)) / denominator);
+	cq_float k = cq_float(2*i) / cq_float(m_length-1) - 1.0f;
+#ifdef _WIN32 
+#pragma warning(push)
+#pragma warning(disable:26451)
+#endif  // Don't want double precision in a 32 bit system. Too expensive
+	m_window.push_back(bessel0(m_beta * sqrt(1.0f - k*k)) / denominator);
+#ifdef _WIN32
+#pragma warning(pop)
+#endif
     }
     for (int i = 0; i < (even ? m_length/2 : (m_length-1)/2); ++i) {
-        m_window.push_back(m_window[int(m_length/2) - i - 1]);
+        m_window.push_back(m_window[uint64_t(m_length/2) - i - 1]);
     }
 }

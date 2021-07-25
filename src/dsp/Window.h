@@ -39,7 +39,7 @@
 
 #include "pi.h"
 
-enum WindowType {
+enum class WindowType {
     RectangularWindow,
     BartlettWindow,
     HammingWindow,
@@ -107,62 +107,62 @@ void Window<T>::encache()
     int n = m_size;
     T *mult = new T[n];
     int i;
-    for (i = 0; i < n; ++i) mult[i] = 1.0;
+    for (i = 0; i < n; ++i) mult[i] = 1.0f;
 
     switch (m_type) {
 		
-    case RectangularWindow:
+    case WindowType::RectangularWindow:
         for (i = 0; i < n; ++i) {
-            mult[i] = mult[i] * 0.5;
+            mult[i] = mult[i] * 0.5f;
 	}
 	break;
 	    
-    case BartlettWindow:
+    case WindowType::BartlettWindow:
         if (n == 2) {
             mult[0] = mult[1] = 0; // "matlab compatible"
         } else if (n == 3) {
             mult[0] = 0;
-            mult[1] = mult[2] = 2./3.;
+            mult[1] = mult[2] = 2.f/3.f;
         } else if (n > 3) {
             for (i = 0; i < n/2; ++i) {
                 mult[i] = mult[i] * (i / T(n/2));
-                mult[i + n - n/2] = mult[i + n - n/2] * (1.0 - (i / T(n/2)));
+                mult[i + n - n/2] = mult[i + n - n/2] * (1.0f - (i / T(n/2)));
             }
 	}
 	break;
 	    
-    case HammingWindow:
+    case WindowType::HammingWindow:
         if (n > 1) {
             for (i = 0; i < n; ++i) {
-                mult[i] = mult[i] * (0.54 - 0.46 * cos(2 * M_PI * i / n));
+                mult[i] = mult[i] * (0.54f - 0.46f * cos(2 * M_PI * i / n));
             }
 	}
 	break;
 	    
-    case HanningWindow:
+    case WindowType::HanningWindow:
         if (n > 1) {
             for (i = 0; i < n; ++i) {
-                mult[i] = mult[i] * (0.50 - 0.50 * cos(2 * M_PI * i / n));
+                mult[i] = mult[i] * (0.50f - 0.50f * cos(2 * M_PI * i / n));
             }
 	}
 	break;
 	    
-    case BlackmanWindow:
+    case WindowType::BlackmanWindow:
         if (n > 1) {
             for (i = 0; i < n; ++i) {
-                mult[i] = mult[i] * (0.42 - 0.50 * cos(2 * M_PI * i / n)
-                                     + 0.08 * cos(4 * M_PI * i / n));
+                mult[i] = mult[i] * (0.42f - 0.50f * cos(2 * M_PI * i / n)
+                                     + 0.08f * cos(4 * M_PI * i / n));
             }
 	}
 	break;
 	    
-    case BlackmanHarrisWindow:
+    case WindowType::BlackmanHarrisWindow:
         if (n > 1) {
             for (i = 0; i < n; ++i) {
-                mult[i] = mult[i] * (0.35875
-                                     - 0.48829 * cos(2 * M_PI * i / n)
-                                     + 0.14128 * cos(4 * M_PI * i / n)
-                                     - 0.01168 * cos(6 * M_PI * i / n));
+                mult[i] = mult[i] * (0.35875f
+                                     - 0.48829f * cos(2 * M_PI * i / n)
+                                     + 0.14128f * cos(4 * M_PI * i / n)
+                                     - 0.01168f * cos(6 * M_PI * i / n));
             }
 	}
 	break;

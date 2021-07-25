@@ -75,20 +75,20 @@ CQKernel::makeWindow(int len) const
     // are periodic. A symmetric window of size N is a periodic
     // one of size N-1 with the first element stuck on the end.
 
-    WindowType wt(BlackmanHarrisWindow);
+    WindowType wt(WindowType::BlackmanHarrisWindow);
 
     switch (m_inparams.window) {
-    case CQParameters::SqrtBlackmanHarris:
-    case CQParameters::BlackmanHarris:
-        wt = BlackmanHarrisWindow;
+    case CQParameters::WindowType::SqrtBlackmanHarris:
+    case CQParameters::WindowType::BlackmanHarris:
+        wt = WindowType::BlackmanHarrisWindow;
         break;
-    case CQParameters::SqrtBlackman:
-    case CQParameters::Blackman:
-        wt = BlackmanWindow;
+    case CQParameters::WindowType::SqrtBlackman:
+    case CQParameters::WindowType::Blackman:
+        wt = WindowType::BlackmanWindow;
         break;
-    case CQParameters::SqrtHann:
-    case CQParameters::Hann:
-        wt = HanningWindow;
+    case CQParameters::WindowType::SqrtHann:
+    case CQParameters::WindowType::Hann:
+        wt = WindowType::HanningWindow;
         break;
     }
 
@@ -97,16 +97,16 @@ CQKernel::makeWindow(int len) const
     win.push_back(win[0]);
 
     switch (m_inparams.window) {
-    case CQParameters::SqrtBlackmanHarris:
-    case CQParameters::SqrtBlackman:
-    case CQParameters::SqrtHann:
+    case CQParameters::WindowType::SqrtBlackmanHarris:
+    case CQParameters::WindowType::SqrtBlackman:
+    case CQParameters::WindowType::SqrtHann:
         for (int i = 0; i < (int)win.size(); ++i) {
             win[i] = sqrt(win[i]) / len;
         }
         break;
-    case CQParameters::BlackmanHarris:
-    case CQParameters::Blackman:
-    case CQParameters::Hann:
+    case CQParameters::WindowType::BlackmanHarris:
+    case CQParameters::WindowType::Blackman:
+    case CQParameters::WindowType::Hann:
         for (int i = 0; i < (int)win.size(); ++i) {
             win[i] = win[i] / len;
         }
@@ -123,15 +123,15 @@ CQKernel::generateKernel()
     cq_float atomHopFactor = m_inparams.atomHopFactor;
     cq_float thresh = m_inparams.threshold;
 
-    cq_float bpo = m_p.binsPerOctave;
+    cq_float bpo = static_cast<cq_float>(m_p.binsPerOctave);
 
-    m_p.minFrequency = (m_p.maxFrequency / 2) * pow(2, 1.0/bpo);
-    m_p.Q = q / (pow(2, 1.0/bpo) - 1.0);
+    m_p.minFrequency = (m_p.maxFrequency / 2) * POW(2, 1.0f/bpo);
+    m_p.Q = q / (POW(2, 1.0f/bpo) - 1.0f);
 
-    cq_float maxNK = int(m_p.Q * m_p.sampleRate / m_p.minFrequency + 0.5);
-    cq_float minNK = int
+    cq_float maxNK = static_cast<cq_float>(static_cast<int>(m_p.Q * m_p.sampleRate / m_p.minFrequency + 0.5f));
+    cq_float minNK = static_cast<cq_float>(static_cast<int>
         (m_p.Q * m_p.sampleRate /
-         (m_p.minFrequency * pow(2, (bpo - 1.0) / bpo)) + 0.5);
+         (m_p.minFrequency * POW(2, (bpo - 1.0f) / bpo)) + 0.5f));
 
     if (minNK == 0 || maxNK == 0) {
         // most likely pathological parameters of some sort
@@ -145,13 +145,13 @@ CQKernel::generateKernel()
         return false;
     }
 
-    m_p.atomSpacing = int(minNK * atomHopFactor + 0.5);
-    m_p.firstCentre = m_p.atomSpacing * ceil(ceil(maxNK / 2.0) / m_p.atomSpacing);
+    m_p.atomSpacing = int(minNK * atomHopFactor + 0.5f);
+    m_p.firstCentre = static_cast<int>(m_p.atomSpacing * ceil(ceil(maxNK / 2.0f) / m_p.atomSpacing));
     m_p.fftSize = MathUtilities::nextPowerOfTwo
-        (m_p.firstCentre + ceil(maxNK / 2.0));
+        (static_cast<int>(m_p.firstCentre + ceil(maxNK / 2.0f)));
 
-    m_p.atomsPerFrame = floor
-        (1.0 + (m_p.fftSize - ceil(maxNK / 2.0) - m_p.firstCentre) / m_p.atomSpacing);
+    m_p.atomsPerFrame = static_cast<int>(floor
+        (1.0 + (m_p.fftSize - ceil(maxNK / 2.0) - m_p.firstCentre) / m_p.atomSpacing));
 
 #ifdef DEBUG_CQ_KERNEL
     cerr << "atomsPerFrame = " << m_p.atomsPerFrame << " (q = " << q << ", Q = " << m_p.Q << ", atomHopFactor = " << atomHopFactor << ", atomSpacing = " << m_p.atomSpacing << ", fftSize = " << m_p.fftSize << ", maxNK = " << maxNK << ", firstCentre = " << m_p.firstCentre << ")" << endl;
@@ -170,16 +170,16 @@ CQKernel::generateKernel()
     for (int k = 1; k <= m_p.binsPerOctave; ++k) {
         
         int nk = int(m_p.Q * m_p.sampleRate /
-                     (m_p.minFrequency * pow(2, ((k-1.0) / bpo))) + 0.5);
+                     (m_p.minFrequency * POW(2, ((k-1.0) / bpo))) + 0.5);
 
         vector<cq_float> win = makeWindow(nk);
 
-        cq_float fk = m_p.minFrequency * pow(2, ((k-1.0) / bpo));
+        cq_float fk = m_p.minFrequency * POW(2, ((k-1.0) / bpo));
 
         vector<cq_float> reals, imags;
         
         for (int i = 0; i < nk; ++i) {
-            cq_float arg = (2.0 * M_PI * fk * i) / m_p.sampleRate;
+            cq_float arg = (2.0f * M_PI * fk * i) / m_p.sampleRate;
             reals.push_back(win[i] * cos(arg));
             imags.push_back(win[i] * sin(arg));
         }
@@ -193,7 +193,7 @@ CQKernel::generateKernel()
             vector<cq_float> rin(m_p.fftSize, 0.0);
             vector<cq_float> iin(m_p.fftSize, 0.0);
 
-            for (int j = 0; j < nk; ++j) {
+            for (uint64_t j = 0; j < nk; ++j) {
                 rin[j + shift] = reals[j];
                 iin[j + shift] = imags[j];
             }
@@ -259,7 +259,7 @@ static bool ccomparator(C &c1, C &c2)
 
 static int maxidx(vector<C> &v)
 {
-    return std::max_element(v.begin(), v.end(), ccomparator) - v.begin();
+    return static_cast<int>(std::max_element(v.begin(), v.end(), ccomparator) - v.begin());
 }
 
 void
@@ -277,8 +277,8 @@ CQKernel::finaliseKernel()
         }
     }
 
-    int nrows = subset.size();
-    int ncols = subset[0].size();
+    int nrows = static_cast<int>(subset.size());
+    int ncols = static_cast<int>(subset[0].size());
     vector<vector<C> > square(ncols); // conjugate transpose of subset * subset
 
     for (int i = 0; i < nrows; ++i) {
@@ -303,7 +303,7 @@ CQKernel::finaliseKernel()
 
     cq_float weight = cq_float(m_p.fftHop) / m_p.fftSize;
     if (!wK.empty()) {
-        weight /= MathUtilities::mean(wK.data(), wK.size());
+        weight /= MathUtilities::mean(wK.data(), static_cast<unsigned int>(wK.size()));
     }
     weight = sqrt(weight);
 
@@ -357,8 +357,8 @@ CQKernel::processForward(const vector<C> &cv)
     vector<C> rv(nrows, C());
 
     for (int i = 0; i < nrows; ++i) {
-        int len = m_kernel.data[i].size();
-        for (int j = 0; j < len; ++j) {
+        int len = static_cast<int>(m_kernel.data[i].size());
+        for (uint64_t j = 0; j < len; ++j) {
             rv[i] += cv[j + m_kernel.origin[i]] * m_kernel.data[i][j];
         }
     }
@@ -383,8 +383,8 @@ CQKernel::processInverse(const vector<C> &cv)
 
     for (int j = 0; j < ncols; ++j) {
         int i0 = m_kernel.origin[j];
-        int i1 = i0 + m_kernel.data[j].size();
-        for (int i = i0; i < i1; ++i) {
+        int i1 = i0 + static_cast<int>(m_kernel.data[j].size());
+        for (uint64_t i = i0; i < i1; ++i) {
             rv[i] += cv[j] * conj(m_kernel.data[j][i - i0]);
         }
     }

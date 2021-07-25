@@ -67,7 +67,7 @@ void MathUtilities::getAlphaNorm(const cq_float *data, unsigned int len, unsigne
 	a  += ::pow( fabs(temp), cq_float(alpha) );
     }
     a /= ( cq_float )len;
-    a = ::pow( a, ( 1.0 / (cq_float) alpha ) );
+    a = ::pow( a, ( 1.0f / (cq_float) alpha ) );
 
     *ANorm = a;
 }
@@ -75,9 +75,9 @@ void MathUtilities::getAlphaNorm(const cq_float *data, unsigned int len, unsigne
 cq_float MathUtilities::getAlphaNorm( const std::vector <cq_float> &data, unsigned int alpha )
 {
     unsigned int i;
-    unsigned int len = data.size();
-    cq_float temp = 0.0;
-    cq_float a=0.0;
+    unsigned int len = static_cast<unsigned int>(data.size());
+    cq_float temp = 0.0f;
+    cq_float a=0.0f;
 	
     for( i = 0; i < len; i++)
     {
@@ -86,7 +86,7 @@ cq_float MathUtilities::getAlphaNorm( const std::vector <cq_float> &data, unsign
 	a  += ::pow( fabs(temp), cq_float(alpha) );
     }
     a /= ( cq_float )len;
-    a = ::pow( a, ( 1.0 / (cq_float) alpha ) );
+    a = ::pow( a, ( 1.0f / (cq_float) alpha ) );
 
     return a;
 }
@@ -94,9 +94,9 @@ cq_float MathUtilities::getAlphaNorm( const std::vector <cq_float> &data, unsign
 cq_float MathUtilities::round(cq_float x)
 {
     if (x < 0) {
-        return -floor(-x + 0.5);
+        return -floor(-x + 0.5f);
     } else {
-        return floor(x + 0.5);
+        return floor(x + 0.5f);
     }
 }
 
@@ -108,7 +108,7 @@ cq_float MathUtilities::median(const cq_float *src, unsigned int len)
     for (int i = 0; i < (int)len; ++i) scratch.push_back(src[i]);
     std::sort(scratch.begin(), scratch.end());
 
-    int middle = len/2;
+    uint64_t middle = len/2;
     if (len % 2 == 0) {
         return (scratch[middle] + scratch[middle - 1]) / 2;
     } else {
@@ -150,7 +150,7 @@ cq_float MathUtilities::mean(const std::vector<cq_float> &src,
 	
     if (count == 0) return 0;
     
-    for (int i = 0; i < (int)count; ++i)
+    for (uint64_t i = 0; i < (int)count; ++i)
     {
         sum += src[start + i];
     }
@@ -267,9 +267,9 @@ void MathUtilities::normalise(cq_float *data, int length, NormaliseType type)
 {
     switch (type) {
 
-    case NormaliseNone: return;
+    case NormaliseType::NormaliseNone: return;
 
-    case NormaliseUnitSum:
+    case NormaliseType::NormaliseUnitSum:
     {
         cq_float sum = 0.0;
         for (int i = 0; i < length; ++i) {
@@ -283,7 +283,7 @@ void MathUtilities::normalise(cq_float *data, int length, NormaliseType type)
     }
     break;
 
-    case NormaliseUnitMax:
+    case NormaliseType::NormaliseUnitMax:
     {
         cq_float max = 0.0;
         for (int i = 0; i < length; ++i) {
@@ -306,9 +306,9 @@ void MathUtilities::normalise(std::vector<cq_float> &data, NormaliseType type)
 {
     switch (type) {
 
-    case NormaliseNone: return;
+    case NormaliseType::NormaliseNone: return;
 
-    case NormaliseUnitSum:
+    case NormaliseType::NormaliseUnitSum:
     {
         cq_float sum = 0.0;
         for (int i = 0; i < (int)data.size(); ++i) sum += data[i];
@@ -318,7 +318,7 @@ void MathUtilities::normalise(std::vector<cq_float> &data, NormaliseType type)
     }
     break;
 
-    case NormaliseUnitMax:
+    case NormaliseType::NormaliseUnitMax:
     {
         cq_float max = 0.0;
         for (int i = 0; i < (int)data.size(); ++i) {

@@ -56,7 +56,7 @@ Resampler::Resampler(int sourceRate, int targetRate) :
 #ifdef DEBUG_RESAMPLER
     cerr << "Resampler::Resampler(" <<  sourceRate << "," << targetRate << ")" << endl;
 #endif
-    initialise(100, 0.02);
+    initialise(100, 0.02f);
 }
 
 Resampler::Resampler(int sourceRate, int targetRate, 
@@ -79,15 +79,15 @@ Resampler::initialise(cq_float snr, cq_float bandwidth)
     int lower = std::min(m_sourceRate, m_targetRate);
 
     m_gcd = MathUtilities::gcd(lower, higher);
-    m_peakToPole = higher / m_gcd;
+    m_peakToPole = static_cast<cq_float>(higher / m_gcd);
 
     if (m_targetRate < m_sourceRate) {
         // antialiasing filter, should be slightly below nyquist
-        m_peakToPole = m_peakToPole / (1.0 - bandwidth/2.0);
+        m_peakToPole = m_peakToPole / (1.0f - bandwidth/2.0f);
     }
 
     KaiserWindow::Parameters params =
-	KaiserWindow::parametersForBandwidth(snr, bandwidth, higher / m_gcd);
+	KaiserWindow::parametersForBandwidth(snr, bandwidth, static_cast<cq_float>(higher / m_gcd));
 
     params.length =
 	(params.length % 2 == 0 ? params.length + 1 : params.length);
@@ -204,7 +204,14 @@ Resampler::initialise(cq_float snr, cq_float bandwidth)
 				     / inputSpacing));
 
 	for (int i = 0; i < filtZipLength; ++i) {
+#ifdef _WIN32 
+#pragma warning(push)
+#pragma warning(disable:26451)
+#endif  // Too expensive to perform 64 bit integer multiplications in a 32 bit machine
 	    p.filter.push_back(filter[i * inputSpacing + phase]);
+#ifdef _WIN32
+#pragma warning(pop)
+#endif
 	}
 
 	m_phaseData[phase] = p;
@@ -272,7 +279,7 @@ Resampler::initialise(cq_float snr, cq_float bandwidth)
     // the centre of the filter.
 
     int h = int(m_filterLength / 2);
-    int n = ceil(cq_float(m_filterLength - h) / outputSpacing);
+    int n = static_cast<int>(ceil(cq_float(m_filterLength - h) / outputSpacing));
     
     m_phase = (h + n * outputSpacing) % inputSpacing;
 
@@ -294,7 +301,7 @@ Resampler::reconstructOne()
 {
     Phase &pd = m_phaseData[m_phase];
     cq_float v = 0.0;
-    int n = pd.filter.size();
+    int n = static_cast<int>(pd.filter.size());
 
     if (n + m_bufferOrigin > (int)m_buffer.size()) {
         cerr << "ERROR: n + m_bufferOrigin > m_buffer.size() [" << n << " + "
@@ -377,30 +384,30 @@ Resampler::resample(int sourceRate, int targetRate, const cq_float *data, int n)
     // padding input samples at the end of input to guarantee at
     // *least* the latency's worth of output samples. that is,
 
-    int inputPad = int(ceil((cq_float(latency) * sourceRate) / targetRate));
+    int64_t inputPad = static_cast<uint64_t>(ceil((cq_float(latency) * sourceRate) / targetRate));
 
     // that means we are providing this much input in total:
 
-    int n1 = n + inputPad;
+    int64_t n1 = n + inputPad;
 
     // and obtaining this much output in total:
 
-    int m1 = int(ceil((cq_float(n1) * targetRate) / sourceRate));
+    int64_t m1 = static_cast<uint64_t>(ceil((cq_float(n1) * targetRate) / sourceRate));
 
     // in order to return this much output to the user:
 
-    int m = int(ceil((cq_float(n) * targetRate) / sourceRate));
+    int64_t m = static_cast<uint64_t>(ceil((cq_float(n) * targetRate) / sourceRate));
     
 #ifdef DEBUG_RESAMPLER
     cerr << "n = " << n << ", sourceRate = " << sourceRate << ", targetRate = " << targetRate << ", m = " << m << ", latency = " << latency << ", inputPad = " << inputPad << ", m1 = " << m1 << ", n1 = " << n1 << ", n1 - n = " << n1 - n << endl;
 #endif
 
-    vector<cq_float> pad(n1 - n, 0.0);
-    vector<cq_float> out(m1 + 1, 0.0);
+    vector<cq_float> pad(n1 - n, 0.0f);
+    vector<cq_float> out(m1 + 1, 0.0f);
 
     int gotData = r.process(data, out.data(), n);
-    int gotPad = r.process(pad.data(), out.data() + gotData, pad.size());
-    int got = gotData + gotPad;
+    int64_t gotPad = static_cast<int64_t>(r.process(pad.data(), out.data() + gotData, static_cast<int>(pad.size())));
+    int64_t got = gotData + gotPad;
     
 #ifdef DEBUG_RESAMPLER
     cerr << "resample: " << n << " in, " << pad.size() << " padding, " << got << " out (" << gotData << " data, " << gotPad << " padding, latency = " << latency << ")" << endl;
@@ -415,7 +422,7 @@ Resampler::resample(int sourceRate, int targetRate, const cq_float *data, int n)
     cerr << endl;
 #endif
 
-    int toReturn = got - latency;
+    int64_t toReturn = got - latency;
     if (toReturn > m) toReturn = m;
 
     vector<cq_float> sliced(out.begin() + latency, 

@@ -33,13 +33,19 @@
 
 #include <math.h>
 
+#ifdef USE_DOUBLE
+#define LOG(x) log(x)
+#else
+#define LOG(x) logf(x)
+#endif
+
 cq_float
 Pitch::getFrequencyForPitch(int midiPitch,
 			    cq_float centsOffset,
 			    cq_float concertA)
 {
     cq_float p = cq_float(midiPitch) + (centsOffset / 100);
-    return concertA * powf(2.0, (p - 69.0) / 12.0);
+    return concertA * POW(2.0f, (p - 69.0f) / 12.0f);
 }
 
 int
@@ -47,14 +53,15 @@ Pitch::getPitchForFrequency(cq_float frequency,
 			    cq_float *centsOffsetReturn,
 			    cq_float concertA)
 {
-    cq_float p = 12.0 * (log(frequency / (concertA / 2.0)) / log(2.0)) + 57.0;
+    cq_float p = 12.0f * 
+        (LOG(frequency / (concertA / 2.0f))) / LOG(2.0f) + 57.0f;
 
-    int midiPitch = int(p + 0.00001);
-    cq_float centsOffset = (p - midiPitch) * 100.0;
+    int midiPitch = int(p + 0.00001f);
+    cq_float centsOffset = (p - midiPitch) * 100.0f;
 
-    if (centsOffset >= 50.0) {
+    if (centsOffset >= 50.0f) {
 	midiPitch = midiPitch + 1;
-	centsOffset = -(100.0 - centsOffset);
+	centsOffset = -(100.0f - centsOffset);
     }
     
     if (centsOffsetReturn) *centsOffsetReturn = centsOffset;

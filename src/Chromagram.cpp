@@ -52,12 +52,12 @@ Chromagram::Chromagram(Parameters params) :
     // floor(bins per semitone / 2)
     int bps = m_params.binsPerOctave / 12;
     m_maxFrequency = midiPitchLimitFreq /
-        pow(2.0, (1.0 + floor(bps/2)) / m_params.binsPerOctave);
+        POW(2.0, (1.0 + floor(bps/2) / m_params.binsPerOctave));
 
     // Min frequency is frequency of midiPitchLimit lowered by the
     // appropriate number of octaveCount.
     m_minFrequency = midiPitchLimitFreq /
-        pow(2.0, m_params.octaveCount + 1);
+        POW(2.0, m_params.octaveCount + 1);
 
     CQParameters p
         (params.sampleRate, m_minFrequency, m_maxFrequency, params.binsPerOctave);
@@ -67,7 +67,7 @@ Chromagram::Chromagram(Parameters params) :
     p.threshold = params.threshold;
     p.window = params.window;
     
-    m_cq = new CQSpectrogram(p, CQSpectrogram::InterpolateLinear);
+    m_cq = new CQSpectrogram(p, CQSpectrogram::Interpolation::InterpolateLinear);
 }
 
 Chromagram::~Chromagram()
@@ -100,13 +100,17 @@ Chromagram::getBinName(int bin) const
         "C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"
     };
 
-    cq_float freq = m_cq->getBinFrequency(m_params.binsPerOctave - bin - 1);
+    cq_float freq = m_cq->getBinFrequency(static_cast<cq_float>(m_params.binsPerOctave - bin - 1));
     int note = Pitch::getPitchForFrequency(freq, 0, m_params.tuningFrequency);
     cq_float nearestFreq =
         Pitch::getFrequencyForPitch(note, 0, m_params.tuningFrequency);
     
     char name[40];
+#ifdef MSVC
     sprintf(name, "%d", bin);
+#else
+    sprintf_s(name, "%d", bin);
+#endif
     if (fabs(freq - nearestFreq) < 0.01) {
         return (name + std::string(" ") + names[note % 12]);
     } else {
@@ -131,17 +135,17 @@ Chromagram::convert(const CQBase::RealBlock &cqout)
 {    
     CQBase::RealBlock chroma;
 
-    int width = cqout.size();
+    size_t width = cqout.size();
 
-    for (int i = 0; i < width; ++i) {
+    for (size_t i = 0; i < width; ++i) {
 
         CQBase::RealSequence column(m_params.binsPerOctave, 0.);
 
         // fold and invert to put low frequencies at the start
 
-        int thisHeight = cqout[i].size();
+        size_t thisHeight = cqout[i].size();
 
-	for (int j = 0; j < thisHeight; ++j) {
+	for (size_t j = 0; j < thisHeight; ++j) {
 	    column[m_params.binsPerOctave - (j % m_params.binsPerOctave) - 1]
                 += cqout[i][j];
 	}

@@ -4,8 +4,10 @@
 
 #ifndef USE_DOUBLE
 typedef float cq_float;
+#define POW(x,y) powf(static_cast<cq_float>(x),static_cast<cq_float>(y))
 #else
 typedef double cq_float;
+#define POW(x,y) pow(static_cast<cq_float>(x),static_cast<cq_float>(y))
 #endif
 
 

@@ -46,7 +46,7 @@
 class CQSpectrogram : public CQBase
 {
 public:
-    enum Interpolation {
+    enum class Interpolation {
         /// leave empty cells as zero
 	InterpolateZeros,
         /// replace empty cells with a repeat of the previous column

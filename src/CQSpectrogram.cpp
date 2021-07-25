@@ -40,7 +40,7 @@ using std::endl;
 //#define DEBUG_CQSPECTROGRAM 1
 
 CQSpectrogram::CQSpectrogram(CQParameters params,
-                             Interpolation interpolation) :
+                             CQSpectrogram::Interpolation interpolation) :
     m_cq(params),
     m_interpolation(interpolation)
 {
@@ -65,12 +65,12 @@ CQSpectrogram::getRemainingOutput()
 CQSpectrogram::RealBlock
 CQSpectrogram::postProcess(const ComplexBlock &cq, bool insist)
 {
-    int width = cq.size();
+    int width = static_cast<int>(cq.size());
 
     // convert to magnitudes
     RealBlock spec;
     for (int i = 0; i < width; ++i) {
-        int height = cq[i].size();
+        int height = static_cast<int>(cq[i].size());
         RealColumn col(height, 0);
         for (int j = 0; j < height; ++j) {
 #ifdef DEBUG_CQSPECTROGRAM
@@ -86,9 +86,9 @@ CQSpectrogram::postProcess(const ComplexBlock &cq, bool insist)
         spec.push_back(col);
     }
 
-    if (m_interpolation == InterpolateZeros) {
+    if (m_interpolation == Interpolation::InterpolateZeros) {
         for (int i = 0; i < width; ++i) {
-            int sh = spec[i].size();
+            int sh = static_cast<int>(spec[i].size());
             int fh = getTotalBins();
             for (int j = sh; j < fh; ++j) {
                 spec[i].push_back(0);
@@ -101,7 +101,7 @@ CQSpectrogram::postProcess(const ComplexBlock &cq, bool insist)
 	m_buffer.push_back(spec[i]);
     }
     
-    if (m_interpolation == InterpolateHold) {
+    if (m_interpolation == Interpolation::InterpolateHold) {
 	return fetchHold(insist);
     } else {
 	return fetchLinear(insist);
@@ -113,15 +113,15 @@ CQSpectrogram::fetchHold(bool)
 {
     RealBlock out;
     
-    int width = m_buffer.size();
+    int width = static_cast<int>(m_buffer.size());
     int height = getTotalBins();
 
     for (int i = 0; i < width; ++i) {
 	
 	RealColumn col = m_buffer[i];
 
-	int thisHeight = col.size();
-	int prevHeight = m_prevColumn.size();
+	int thisHeight = static_cast<int>(col.size());
+	int prevHeight = static_cast<int>(m_prevColumn.size());
 
 	for (int j = thisHeight; j < height; ++j) {
 	    if (j < prevHeight) {
@@ -163,7 +163,7 @@ CQSpectrogram::fetchLinear(bool insist)
     // reached the first full-height column in the CQ output, and we
     // can interpolate nothing.
     
-    int width = m_buffer.size();
+    int width = static_cast<int>(m_buffer.size());
     int height = getTotalBins();
 
     if (width == 0) return out;
@@ -230,16 +230,16 @@ CQSpectrogram::linearInterpolated(const RealBlock &g, int x0, int x1)
 	throw std::logic_error("x0 and x1 are not the same height");
     }
 
-    int height = g[x0].size();
+    int height = static_cast<int>(g[x0].size());
     int width = x1 - x0;
 
     RealBlock out(g.begin() + x0, g.begin() + x1);
 
     for (int y = 0; y < height; ++y) {
 
-	int spacing = width;
-	for (int i = 1; i < width; ++i) {
-	    int thisHeight = g[x0 + i].size();
+	uint64_t spacing = width;
+	for (uint64_t i = 1; i < width; ++i) {
+	    int thisHeight = static_cast<int>(g[x0 + i].size());
 	    if (thisHeight > height) {
 		throw std::logic_error("First column not full-height");
 	    }
@@ -251,12 +251,12 @@ CQSpectrogram::linearInterpolated(const RealBlock &g, int x0, int x1)
 
 	if (spacing < 2) continue;
 
-	for (int i = 0; i + spacing <= width; i += spacing) {
+	for (uint64_t i = 0; i + spacing <= width; i += spacing) {
 	    for (int j = 1; j < spacing; ++j) {
 		cq_float proportion = cq_float(j)/cq_float(spacing);
-		cq_float interpolated = 
-		    g[x0 + i][y] * (1.0 - proportion) +
-		    g[x0 + i + spacing][y] * proportion;
+		cq_float interpolated = static_cast<cq_float>(
+		    g[x0 + i][y] * (1.0f - proportion) +
+		    g[x0 + i + spacing][y] * proportion);
 		out[i + j].push_back(interpolated);
 	    }
 	}

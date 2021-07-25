@@ -99,17 +99,17 @@ public:
     static int	  getMax( const std::vector<cq_float> &data, cq_float* max = 0 );
     static int    compareInt(const void * a, const void * b);
 
-    enum NormaliseType {
+    enum class NormaliseType {
         NormaliseNone,
         NormaliseUnitSum,
         NormaliseUnitMax
     };
 
     static void normalise(cq_float *data, int length,
-                          NormaliseType n = NormaliseUnitMax);
+                          NormaliseType n = NormaliseType::NormaliseUnitMax);
 
     static void normalise(std::vector<cq_float> &data,
-                          NormaliseType n = NormaliseUnitMax);
+                          NormaliseType n = NormaliseType::NormaliseUnitMax);
 
     /**
      * Threshold the input/output vector data against a moving-mean

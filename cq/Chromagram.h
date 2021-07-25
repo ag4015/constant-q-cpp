@@ -46,11 +46,11 @@ public:
 	    lowestOctave(0),
 	    octaveCount(7),
 	    binsPerOctave(36),
-	    tuningFrequency(440.),
-            q(1.0),                    // Q scaling factor
-            atomHopFactor(0.25),       // hop size of shortest temporal atom
-            threshold(0.0005),         // sparsity threshold for resulting kernel
-            window(CQParameters::SqrtBlackmanHarris) // window shape
+	    tuningFrequency(static_cast<cq_float>(440.0f)),
+            q(1.0f),                    // Q scaling factor
+            atomHopFactor(0.25f),       // hop size of shortest temporal atom
+            threshold(0.0005f),         // sparsity threshold for resulting kernel
+            window(CQParameters::WindowType::SqrtBlackmanHarris) // window shape
         { }
 
         /**

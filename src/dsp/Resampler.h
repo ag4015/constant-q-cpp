@@ -101,9 +101,9 @@ private:
     cq_float m_peakToPole;
     
     struct Phase {
-        int nextPhase;
+        int nextPhase = 0;
         std::vector<cq_float> filter;
-        int drop;
+        int drop = 0;
     };
 
     Phase *m_phaseData;

@@ -41,16 +41,16 @@
 class CQParameters
 {
 public:
-    enum WindowType {
-	SqrtBlackmanHarris,
-	SqrtBlackman,
-	SqrtHann,
-	BlackmanHarris,
-	Blackman,
-	Hann,
+    enum class WindowType {
+		SqrtBlackmanHarris,
+		SqrtBlackman,
+		SqrtHann,
+		BlackmanHarris,
+		Blackman,
+		Hann,
     };
 
-    enum DecimatorType {
+    enum class DecimatorType {
         BetterDecimator,
         FasterDecimator
     };
@@ -70,11 +70,11 @@ public:
 	minFrequency(_minFrequency),
 	maxFrequency(_maxFrequency),
 	binsPerOctave(_binsPerOctave),
-	q(1.0),                     // Q scaling factor
-	atomHopFactor(0.25),        // hop size of shortest temporal atom
-	threshold(0.0005),          // sparsity threshold for resulting kernel
-	window(SqrtBlackmanHarris), // window shape
-        decimator(BetterDecimator)  // decimator quality setting
+	q(1.0f),                     // Q scaling factor
+	atomHopFactor(0.25f),        // hop size of shortest temporal atom
+	threshold(0.0005f),          // sparsity threshold for resulting kernel
+	window(CQParameters::WindowType::SqrtBlackmanHarris), // window shape
+        decimator(CQParameters::DecimatorType::BetterDecimator)  // decimator quality setting
     { }
 
     /**

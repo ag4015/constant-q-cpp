@@ -58,7 +58,7 @@ ConstantQ::ConstantQ(CQParameters params) :
     m_kernel(0),
     m_fft(0)
 {
-    if (m_minFrequency <= 0.0 || m_maxFrequency <= 0.0) {
+    if (m_minFrequency <= 0.0f || m_maxFrequency <= 0.0f) {
         throw std::invalid_argument("Frequency extents must be positive");
     }
 
@@ -77,7 +77,7 @@ ConstantQ::~ConstantQ()
 cq_float
 ConstantQ::getMinFrequency() const
 {
-    return m_p.minFrequency / pow(2.0, m_octaves - 1);
+    return m_p.minFrequency / POW(2, static_cast<cq_float>(m_octaves - 1));
 }
 
 cq_float
@@ -85,13 +85,13 @@ ConstantQ::getBinFrequency(cq_float bin) const
 {
     // our bins are returned in high->low order
     bin = (getBinsPerOctave() * getOctaves()) - bin - 1;
-    return getMinFrequency() * pow(2, (bin / getBinsPerOctave()));
+    return getMinFrequency() * POW(2, (bin / getBinsPerOctave()));
 }
 
 void
 ConstantQ::initialise()
 {
-    m_octaves = int(ceil(log(m_maxFrequency / m_minFrequency) / log(2)));
+    m_octaves = uint16_t(ceil(log(m_maxFrequency / m_minFrequency) / log(2)));
 
     if (m_octaves < 1) {
         m_kernel = 0; // incidentally causing isValid() to return false
@@ -111,7 +111,7 @@ ConstantQ::initialise()
     // target rates, and if we start from the actual samplerate we
     // risk getting non-integer rates for lower octaves
 
-    int sourceRate = pow(2, m_octaves);
+    int sourceRate = static_cast<int>(POW(2, m_octaves));
     vector<int> latencies;
 
     // top octave, no resampling
@@ -120,16 +120,16 @@ ConstantQ::initialise()
 
     for (int i = 1; i < m_octaves; ++i) {
 
-        int factor = pow(2, i);
+        int factor = static_cast<int>(POW(2, i));
 
         Resampler *r;
 
-        if (m_inparams.decimator == CQParameters::BetterDecimator) {
+        if (m_inparams.decimator == CQParameters::DecimatorType::BetterDecimator) {
             r = new Resampler
-                (sourceRate, sourceRate / factor, 50, 0.05);
+                (sourceRate, sourceRate / factor, 50, 0.05f);
         } else {
             r = new Resampler
-                (sourceRate, sourceRate / factor, 25, 0.3);
+                (sourceRate, sourceRate / factor, 25, 0.3f);
         }                
 
 #ifdef DEBUG_CQ
@@ -170,7 +170,7 @@ ConstantQ::initialise()
         m_decimators.push_back(r);
     }
 
-    m_bigBlockSize = m_p.fftSize * pow(2, m_octaves - 1);
+    m_bigBlockSize = m_p.fftSize * static_cast<int>(POW(2, m_octaves - 1));
 
     // Now add in the extra padding and compensate for hops that must
     // be dropped in order to align the atom centres across
@@ -182,8 +182,8 @@ ConstantQ::initialise()
 
     vector<int> drops;
     for (int i = 0; i < m_octaves; ++i) {
-	int factor = pow(2, i);
-	int dropHops = emptyHops * pow(2, m_octaves - i - 1) - emptyHops;
+	int factor = static_cast<int>(POW(2, i));
+	int dropHops = emptyHops * static_cast<int>(POW(2, m_octaves - i - 1)) - emptyHops;
 	int drop = ((dropHops * m_p.fftHop) * factor) / m_p.atomsPerFrame;
 	drops.push_back(drop);
     }
@@ -197,19 +197,19 @@ ConstantQ::initialise()
     int totalLatency = maxLatPlusDrop;
 
     int lat0 = totalLatency - latencies[0] - drops[0];
-    totalLatency = ceil(cq_float(lat0 / m_p.fftHop) * m_p.fftHop)
+    totalLatency = static_cast<int>(ceil(cq_float(lat0 / m_p.fftHop) * m_p.fftHop))
 	+ latencies[0] + drops[0];
 
     // We want (totalLatency - latencies[i]) to be a multiple of 2^i
     // for each octave i, so that we do not end up with fractional
     // octave latencies below. In theory this is hard, in practice if
     // we ensure it for the last octave we should be OK.
-    cq_float finalOctLat = latencies[m_octaves-1];
-    cq_float finalOctFact = pow(2, m_octaves-1);
+    cq_float finalOctLat = static_cast<cq_float>(latencies[static_cast<uint64_t>(m_octaves) - 1]);
+    cq_float finalOctFact = POW(2, m_octaves-1);
     totalLatency =
         int(finalOctLat +
             finalOctFact *
-            ceil((totalLatency - finalOctLat) / finalOctFact) + .5);
+            ceil((totalLatency - finalOctLat) / finalOctFact) + .5f);
 
 #ifdef DEBUG_CQ
     cerr << "total latency = " << totalLatency << endl;
@@ -218,7 +218,7 @@ ConstantQ::initialise()
     // Padding as in the reference (will be introduced with the
     // latency compensation in the loop below)
     m_outputLatency = totalLatency + m_bigBlockSize
-	- m_p.firstCentre * pow(2, m_octaves-1);
+	- m_p.firstCentre * static_cast<int>(POW(2, m_octaves-1));
 
 #ifdef DEBUG_CQ
     cerr << "m_bigBlockSize = " << m_bigBlockSize << ", firstCentre = "
@@ -228,7 +228,7 @@ ConstantQ::initialise()
 
     for (int i = 0; i < m_octaves; ++i) {
 
-	cq_float factor = pow(2, i);
+	cq_float factor = POW(2, i);
 
 	// Calculate the difference between the total latency applied
 	// across all octaves, and the existing latency due to the
@@ -256,8 +256,14 @@ ConstantQ::initialise()
              << octaveLatency << endl;
 #endif
 
-        m_buffers.push_back
-            (RealSequence(int(octaveLatency + 0.5), 0.0));
+#ifdef _WIN32 
+#pragma warning(push)
+#pragma warning(disable:26451)
+#endif  // Don't want double precision in a 32 bit system. Too expensive
+        m_buffers.push_back(RealSequence(int(octaveLatency + 0.5f), 0.0f));
+#ifdef _WIN32
+#pragma warning(pop)
+#endif
     }
 
     m_fft = new FFTReal(m_p.fftSize);
@@ -269,7 +275,7 @@ ConstantQ::process(const RealSequence &td)
     m_buffers[0].insert(m_buffers[0].end(), td.begin(), td.end());
 
     for (int i = 1; i < m_octaves; ++i) {
-        RealSequence dec = m_decimators[i]->process(td.data(), td.size());
+        RealSequence dec = m_decimators[i]->process(td.data(), static_cast<int>(td.size()));
         m_buffers[i].insert(m_buffers[i].end(), dec.begin(), dec.end());
     }
 
@@ -283,22 +289,22 @@ ConstantQ::process(const RealSequence &td)
 	// have variable additional latency per octave
 	bool enough = true;
 	for (int i = 0; i < m_octaves; ++i) {
-	    int required = m_p.fftSize * pow(2, m_octaves - i - 1);
+	    int required = m_p.fftSize * static_cast<int>(POW(2, m_octaves - i - 1));
 	    if ((int)m_buffers[i].size() < required) {
 		enough = false;
 	    }
 	}
 	if (!enough) break;
 
-        int base = out.size();
-        int totalColumns = pow(2, m_octaves - 1) * m_p.atomsPerFrame;
+        int base = static_cast<int>(out.size());
+        int totalColumns = static_cast<int>(POW(2, m_octaves - 1)) * m_p.atomsPerFrame;
         for (int i = 0; i < totalColumns; ++i) {
             out.push_back(ComplexColumn());
         }
 
-        for (int octave = 0; octave < m_octaves; ++octave) {
+        for (uint8_t octave = 0; octave < m_octaves; ++octave) {
 
-            int blocksThisOctave = pow(2, (m_octaves - octave - 1));
+            int blocksThisOctave = static_cast<int>(POW(2, (m_octaves - octave - 1)));
 
             for (int b = 0; b < blocksThisOctave; ++b) {
                 ComplexBlock block = processOctaveBlock(octave);
@@ -315,9 +321,9 @@ ConstantQ::process(const RealSequence &td)
                         out[target].push_back(Complex());
                     }
                     
-                    for (int i = 0; i < m_p.binsPerOctave; ++i) {
-                        out[target][m_p.binsPerOctave * octave + i] = 
-                            block[j][m_p.binsPerOctave - i - 1];
+                    for (uint8_t i = 0; i < m_p.binsPerOctave; ++i) {
+                        out[target][m_p.binsPerOctave * static_cast<uint64_t>(octave) + i] = 
+                            block[j][static_cast<uint64_t>(m_p.binsPerOctave) - i - 1];
                     }
                 }
             }
@@ -331,16 +337,16 @@ ConstantQ::ComplexBlock
 ConstantQ::getRemainingOutput()
 {
     // Same as padding added at start, though rounded up
-    int pad = ceil(cq_float(m_outputLatency) / m_bigBlockSize) * m_bigBlockSize;
-    RealSequence zeros(pad, 0.0);
+    int pad = static_cast<int>(ceil(cq_float(m_outputLatency) / m_bigBlockSize)) * m_bigBlockSize;
+    RealSequence zeros(pad, 0.0f);
     return process(zeros);
 }
 
 ConstantQ::ComplexBlock
 ConstantQ::processOctaveBlock(int octave)
 {
-    RealSequence ro(m_p.fftSize, 0.0);
-    RealSequence io(m_p.fftSize, 0.0);
+    RealSequence ro(m_p.fftSize, 0.0f);
+    RealSequence io(m_p.fftSize, 0.0f);
 
     m_fft->forward(m_buffers[octave].data(), ro.data(), io.data());
 
@@ -359,7 +365,7 @@ ConstantQ::processOctaveBlock(int octave)
     for (int j = 0; j < m_p.atomsPerFrame; ++j) {
         cqblock.push_back(ComplexColumn());
         for (int i = 0; i < m_p.binsPerOctave; ++i) {
-            cqblock[j].push_back(cqrowvec[i * m_p.atomsPerFrame + j]);
+            cqblock[j].push_back(cqrowvec[i * static_cast<uint64_t>(m_p.atomsPerFrame) + j]);
         }
     }
 

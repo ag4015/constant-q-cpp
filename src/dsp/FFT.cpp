@@ -67,7 +67,7 @@ public:
 
         for (int i = 0; i < m_n; ++i) {
             m_kin[i].r = ri[i];
-            m_kin[i].i = (ii ? ii[i] : 0.0);
+            m_kin[i].i = (ii ? ii[i] : 0.0f);
         }
 
         if (!inverse) {
@@ -83,7 +83,7 @@ public:
 
             kiss_fft(m_plani, m_kin, m_kout);
 
-            cq_float scale = 1.0 / m_n;
+            cq_float scale = 1.0f / m_n;
 
             for (int i = 0; i < m_n; ++i) {
                 ro[i] = m_kout[i].r * scale;
@@ -179,7 +179,7 @@ public:
         
         kiss_fftri(m_plani, m_c, ro);
 
-        cq_float scale = 1.0 / m_n;
+        cq_float scale = 1.0f / m_n;
 
         for (int i = 0; i < m_n; ++i) {
             ro[i] *= scale;

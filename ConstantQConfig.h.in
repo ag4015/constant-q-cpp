@@ -1,7 +1,8 @@
 #ifndef CONSTANTQ_CONFIG_H
 #define CONSTANTQ_CONFIG_H
 
-#cmakedefine USE_DOUBLE
+#cmakedefine USE_DOUBLE // Use double as floating point
+#cmakedefine MSVC // Compiled using Microsoft Visual Studio
 
 #ifndef USE_DOUBLE
 typedef float cq_float;
