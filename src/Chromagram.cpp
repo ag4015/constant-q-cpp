@@ -29,6 +29,7 @@
     authorization.
 */
 
+#include "ConstantQConfig.h"
 #include "Chromagram.h"
 #include "CQSpectrogram.h"
 #include "Pitch.h"
@@ -100,16 +101,16 @@ Chromagram::getBinName(int bin) const
         "C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"
     };
 
-    cq_float freq = m_cq->getBinFrequency(static_cast<cq_float>(m_params.binsPerOctave - bin - 1));
+    cq_float freq = m_cq->getBinFrequency(static_cast<cq_float>(static_cast<int64_t>(m_params.binsPerOctave) - bin - 1));
     int note = Pitch::getPitchForFrequency(freq, 0, m_params.tuningFrequency);
     cq_float nearestFreq =
         Pitch::getFrequencyForPitch(note, 0, m_params.tuningFrequency);
     
     char name[40];
 #ifdef MSVC
-    sprintf(name, "%d", bin);
-#else
     sprintf_s(name, "%d", bin);
+#else
+    sprintf(name, "%d", bin);
 #endif
     if (fabs(freq - nearestFreq) < 0.01) {
         return (name + std::string(" ") + names[note % 12]);

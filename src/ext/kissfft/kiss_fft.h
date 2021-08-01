@@ -42,13 +42,13 @@ extern "C" {
 # else	
 #  define kiss_fft_scalar int16_t
 # endif
-#elifdef USE_DOUBLE
+#endif
+#ifdef USE_DOUBLE
 #define kiss_fft_scalar double
-#else
-# ifndef kiss_fft_scalar
+#endif
+#ifndef kiss_fft_scalar
 /*  default is float */
 #   define kiss_fft_scalar float
-# endif
 #endif
 
 typedef struct {
