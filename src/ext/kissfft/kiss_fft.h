@@ -5,7 +5,6 @@
 #include <stdio.h>
 #include <math.h>
 #include <string.h>
-#include "kiss_fftConfig.h"
 
 #ifdef __cplusplus
 extern "C" {
