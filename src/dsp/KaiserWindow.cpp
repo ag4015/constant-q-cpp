@@ -32,6 +32,7 @@
 #include "KaiserWindow.h"
 
 #include "MathUtilities.h"
+#include <cstdint>
 
 KaiserWindow::Parameters
 KaiserWindow::parametersForTransitionWidth(cq_float attenuation,
