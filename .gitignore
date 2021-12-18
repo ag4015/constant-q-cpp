@@ -7,3 +7,4 @@
 *.class
 doc/
 o
+cq/ConstantQConfig.h

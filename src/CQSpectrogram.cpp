@@ -237,8 +237,8 @@ CQSpectrogram::linearInterpolated(const RealBlock &g, int x0, int x1)
 
     for (int y = 0; y < height; ++y) {
 
-	uint64_t spacing = width;
-	for (uint64_t i = 1; i < width; ++i) {
+	int spacing = width;
+	for (int i = 1; i < width; ++i) {
 	    int thisHeight = static_cast<int>(g[x0 + i].size());
 	    if (thisHeight > height) {
 		throw std::logic_error("First column not full-height");
@@ -251,7 +251,7 @@ CQSpectrogram::linearInterpolated(const RealBlock &g, int x0, int x1)
 
 	if (spacing < 2) continue;
 
-	for (uint64_t i = 0; i + spacing <= width; i += spacing) {
+	for (int i = 0; i + spacing <= width; i += spacing) {
 	    for (int j = 1; j < spacing; ++j) {
 		cq_float proportion = cq_float(j)/cq_float(spacing);
 		cq_float interpolated = static_cast<cq_float>(

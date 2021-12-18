@@ -193,7 +193,7 @@ CQKernel::generateKernel()
             vector<cq_float> rin(m_p.fftSize, 0.0);
             vector<cq_float> iin(m_p.fftSize, 0.0);
 
-            for (uint64_t j = 0; j < nk; ++j) {
+            for (int j = 0; j < nk; ++j) {
                 rin[j + shift] = reals[j];
                 iin[j + shift] = imags[j];
             }
@@ -358,7 +358,7 @@ CQKernel::processForward(const vector<C> &cv)
 
     for (int i = 0; i < nrows; ++i) {
         int len = static_cast<int>(m_kernel.data[i].size());
-        for (uint64_t j = 0; j < len; ++j) {
+        for (int j = 0; j < len; ++j) {
             rv[i] += cv[j + m_kernel.origin[i]] * m_kernel.data[i][j];
         }
     }
@@ -384,7 +384,7 @@ CQKernel::processInverse(const vector<C> &cv)
     for (int j = 0; j < ncols; ++j) {
         int i0 = m_kernel.origin[j];
         int i1 = i0 + static_cast<int>(m_kernel.data[j].size());
-        for (uint64_t i = i0; i < i1; ++i) {
+        for (int i = i0; i < i1; ++i) {
             rv[i] += cv[j] * conj(m_kernel.data[j][i - i0]);
         }
     }

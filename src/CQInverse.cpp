@@ -324,10 +324,10 @@ CQInverse::processOctave(int octave, const ComplexBlock &columns)
             ("Columns in octave must be a multiple of atoms per frame");
     }
 
-    for (uint64_t i = 0; i < ncols; i += m_p.atomsPerFrame) {
+    for (int i = 0; i < ncols; i += m_p.atomsPerFrame) {
 
         ComplexColumn tallcol;
-        for (uint64_t b = 0; b < m_binsPerOctave; ++b) {
+        for (int b = 0; b < m_binsPerOctave; ++b) {
             for (int a = 0; a < m_p.atomsPerFrame; ++a) {
                 tallcol.push_back(columns[i + a][m_binsPerOctave - b - 1]);
             }

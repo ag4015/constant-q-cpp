@@ -150,7 +150,7 @@ cq_float MathUtilities::mean(const std::vector<cq_float> &src,
 	
     if (count == 0) return 0;
     
-    for (uint64_t i = 0; i < (int)count; ++i)
+    for (int i = 0; i < (int)count; ++i)
     {
         sum += src[start + i];
     }
